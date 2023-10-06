@@ -1,3 +1,4 @@
+from os import name
 from pulumi_aws import ec2, get_availability_zones
 import pulumi
 import ipaddress
@@ -5,17 +6,27 @@ import ipaddress
 network_config = pulumi.Config("network")
 vpc_cidr = network_config.require("cidr")
 subnet_mask = network_config.require_int("subnet_mask")
+name_prefix = network_config.require("name_prefix")
+
+discovery_config = pulumi.Config("discovery")
+
+"""
+Set common tags
+"""
+discovery_tags = {
+    "karpenter.sh/discovery": name_prefix,
+}
 
 """
 Create VPC
 """
 vpc = ec2.Vpc(
-    "main",
+    f"{name_prefix}",
     cidr_block=vpc_cidr,
     enable_dns_hostnames=True,
     enable_dns_support=True,
     tags={
-        "Name": "main",
+        "Name": f"{name_prefix}",
     },
 )
 
@@ -33,30 +44,28 @@ subnets_private = []
 for i in range(network_config.require_int("azs") * 2):
     az = azs.names[ i % len(azs.names) ]
     if i % 2 == 0:
+        tags = {"Name": f"{name_prefix}-public-{az}"}
         subnets_public.append(
             ec2.Subnet(
-                f"public-{az}",
+                f"{name_prefix}-public-{az}",
                 assign_ipv6_address_on_creation=False,
                 availability_zone=az,
                 cidr_block=str(list(ipaddress.IPv4Network(vpc_cidr).subnets(new_prefix=subnet_mask))[i]),
                 map_public_ip_on_launch=False,
-                tags={
-                    "Name": f"public-{az}",
-                },
+                tags=tags | discovery_tags,
                 vpc_id=vpc.id,
             )
         )
     else:
+        tags = {"Name": f"{name_prefix}-private-{az}"}
         subnets_private.append(
             ec2.Subnet(
-                f"private-{az}",
+                f"{name_prefix}-private-{az}",
                 assign_ipv6_address_on_creation=False,
                 availability_zone=az,
                 cidr_block=str(list(ipaddress.IPv4Network(vpc_cidr).subnets(new_prefix=subnet_mask))[i]),
                 map_public_ip_on_launch=False,
-                tags={
-                    "Name": f"private-{az}",
-                },
+                tags=tags | discovery_tags,
                 vpc_id=vpc.id,
             )
         )
@@ -65,9 +74,9 @@ for i in range(network_config.require_int("azs") * 2):
 Create internet gateway
 """
 igw = ec2.InternetGateway(
-    "main",
+    f"{name_prefix}",
     tags={
-        "Name": "main",
+        "Name": f"{name_prefix}",
     },
     vpc_id=vpc.id,
 )
@@ -89,29 +98,29 @@ for i in range(ngw_count):
     
     eips.append(
         ec2.Eip(
-            f"main-{az}",
+            f"{name_prefix}-{az}",
             tags={
-                "Name": f"main-{az}",
+                "Name": f"{name_prefix}-{az}",
             },
         )
     )
 
     ngws.append(
         ec2.NatGateway(
-            f"main-{az}",
+            f"{name_prefix}-{az}",
             allocation_id=eips[i].id,
             subnet_id=subnets_public[i].id,
             tags={
-                "Name": f"main-{az}",
+                "Name": f"{name_prefix}-{az}",
             },
         )
     )
     
     rts_private.append(
         ec2.RouteTable(
-            f"private-{az}",
+            f"{name_prefix}-private-{az}",
             tags={
-                "Name": f"private-{az}",
+                "Name": f"{name_prefix}-private-{az}",
             },
             vpc_id=vpc.id,
             routes=[
@@ -128,9 +137,9 @@ for i in range(ngw_count):
 Create route tables
 """
 route_table_public = ec2.RouteTable(
-    "public",
+    f"{name_prefix}-public",
     tags={
-        "Name": "public",
+        "Name": f"{name_prefix}-public",
     },
     vpc_id=vpc.id,
     routes=[
@@ -147,16 +156,16 @@ Create route table associations
 for i in range(len(subnets_public)):
     az = azs.names[ i % len(azs.names) ]
     ec2.route_table_association.RouteTableAssociation(
-        f"public-{az}",
+        f"{name_prefix}-public-{az}",
         route_table_id=route_table_public.id,
         subnet_id=subnets_public[i].id,
     )
 
-if len(rts_private) > 0:
+if len(rts_private) > 1:
     for i in range(len(subnets_private)):
         az = azs.names[ i % len(azs.names) ]
         ec2.route_table_association.RouteTableAssociation(
-            f"private-{az}",
+            f"{name_prefix}-private-{az}",
             route_table_id=rts_private[i].id,
             subnet_id=subnets_private[i].id,
         )
@@ -164,7 +173,7 @@ else:
     for i in range(len(subnets_private)):
         az = azs.names[ i % len(azs.names) ]
         ec2.route_table_association.RouteTableAssociation(
-            f"private-{az}",
+            f"{name_prefix}-private-{az}",
             route_table_id=rts_private[0].id,
             subnet_id=subnets_private[i].id,
         )

@@ -2,7 +2,10 @@ config:
   aws:region: eu-central-1
   aws:profile: dev
 
+  org: luismiguelsaez
+
+  network:name_prefix: "main"
   network:cidr: "10.0.0.0/16"
   network:azs: 3
   network:subnet_mask: 24
-  network:ngw_multi_az: True
+  network:ngw_multi_az: False

@@ -4,3 +4,11 @@ runtime:
   options:
     virtualenv: venv
 description: EKS main cluster
+
+config:
+  org: luismiguelsaez
+
+  aws:region: eu-central-1
+
+  eks:version: "1.27"
+  eks:name_prefix: "main"

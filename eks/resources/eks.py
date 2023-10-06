@@ -43,13 +43,15 @@ eks_cluster = eks.Cluster(
     }
 )
 
-#identity_provider = eks.IdentityProviderConfig(
-#    f"{eks_name_prefix}-oidc",
-#    cluster_name=eks_cluster.name,
-#    oidc=eks.IdentityProviderConfigOidcArgs(
-#        issuer_url=eks_cluster.identities[0].oidcs[0].issuer,
-#    )
-#)
+identity_provider = eks.IdentityProviderConfig(
+    f"{eks_name_prefix}-oidc",
+    cluster_name=eks_cluster.name,
+    oidc=eks.IdentityProviderConfigOidcArgs(
+        identity_provider_config_name=f"{eks_name_prefix}-oidc",
+        issuer_url=eks_cluster.identities[0].oidcs[0].issuer,
+        cliente_id="kubernetes"
+    )
+)
 
 oidc_fingerprint = http.get_ssl_cert_fingerprint(host=f"oidc.eks.{aws_config.require('region')}.amazonaws.com")
 oidc_provider = OpenIdConnectProvider(

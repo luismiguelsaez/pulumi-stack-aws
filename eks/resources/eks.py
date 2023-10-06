@@ -60,3 +60,23 @@ eks_addon_coredns = eks.Addon(
         }
     )
 )
+
+"""
+Create EKS node group
+"""
+eks_nodegroup_system = eks.NodeGroup(
+    resource_name=f"{eks_name_prefix}-system",
+    cluster_name=eks_cluster.name,
+    node_group_name=f"{eks_name_prefix}-system",
+    node_role_arn=iam.eks_node_role.arn,
+    subnet_ids=network.get_output("subnets_private"),
+    scaling_config=eks.NodeGroupScalingConfigArgs(
+        desired_size=3,
+        max_size=10,
+        min_size=3
+    ),
+    instance_types=["t4g.medium", "t4g.large"],
+    capacity_type="ON_DEMAND",
+    ami_type="BOTTLEROCKET_ARM_64",
+    disk_size=20,
+)

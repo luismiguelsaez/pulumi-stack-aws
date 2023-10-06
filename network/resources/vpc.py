@@ -158,7 +158,7 @@ if len(rts_private) > 0:
         ec2.route_table_association.RouteTableAssociation(
             f"private-{az}",
             route_table_id=rts_private[i].id,
-            subnet_id=subnets_public[i].id,
+            subnet_id=subnets_private[i].id,
         )
 else:
     for i in range(len(subnets_private)):
@@ -166,5 +166,5 @@ else:
         ec2.route_table_association.RouteTableAssociation(
             f"private-{az}",
             route_table_id=rts_private[0].id,
-            subnet_id=subnets_public[i].id,
+            subnet_id=subnets_private[i].id,
         )

@@ -40,6 +40,7 @@ eks_cluster = eks.Cluster(
 )
 
 eks_addon_coredns = eks.Addon(
+    resource_name=f"{eks_name_prefix}-coredns",
     cluster_name=eks_cluster.name,
     addon_name="coredns",
     resolve_conflicts_on_create="OVERWRITE",

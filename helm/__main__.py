@@ -1,6 +1,7 @@
 from pulumi import get_stack, export, StackReference, Config, ResourceOptions
 from pulumi_kubernetes import Provider
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
+from resources import iam
 
 config = Config()
 org = config.require("org")
@@ -33,6 +34,12 @@ karpenter_helm_release = Release(
     values={
         "controller": {
             "logLevel": "info",
+        },
+        "serviceAccount": {
+            "create": True,
+            "anntations": {
+                "eks.amazonaws.com/role-arn": iam.karpenter_role.arn,
+            }
         },
         "clusterName": eks.get_output("eks_cluster_name"),
         "clusterEndpoint": eks.get_output("eks_cluster_endpoint"),

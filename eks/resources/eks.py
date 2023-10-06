@@ -1,5 +1,6 @@
 from pulumi import get_stack, StackReference, Config
 from pulumi_aws import eks
+import json
 from . import iam
 
 config = Config()
@@ -36,4 +37,26 @@ eks_cluster = eks.Cluster(
         "Name": f"{eks_name_prefix}",
         "Environment": env
     }
+)
+
+eks_addon_coredns = eks.Addon(
+    cluster_name=eks_cluster.name,
+    addon_name="coredns",
+    resolve_conflicts_on_create="OVERWRITE",
+    resolve_conflicts_on_update="OVERWRITE",
+    configuration_values=json.dumps(
+        {
+            "replicaCount": 4,
+            "resources": {
+                "limits": {
+                    "cpu": "100m",
+                    "memory": "200Mi"
+                },
+                "requests": {
+                    "cpu": "100m",
+                    "memory": "200Mi"
+                }
+            }
+        }
+    )
 )

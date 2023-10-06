@@ -77,6 +77,7 @@ Create NAT gateway
 """
 eips = []
 ngws = []
+rts_private = []
 
 if network_config.require_bool("ngw_multi_az"):
     ngw_count = network_config.require_int("azs")
@@ -92,17 +93,33 @@ for i in range(ngw_count):
             tags={
                 "Name": f"main-{az}",
             },
-        ).id
+        )
     )
 
     ngws.append(
         ec2.NatGateway(
             f"main-{az}",
-            allocation_id=eips[i],
+            allocation_id=eips[i].id,
             subnet_id=subnets_public[i].id,
             tags={
                 "Name": f"main-{az}",
             },
+        )
+    )
+    
+    rts_private.append(
+        ec2.RouteTable(
+            f"private-{az}",
+            tags={
+                "Name": f"private-{az}",
+            },
+            vpc_id=vpc.id,
+            routes=[
+                ec2.RouteTableRouteArgs(
+                    cidr_block="0.0.0.0/0",
+                    nat_gateway_id=ngws[i].id,
+                )
+            ],
         )
     )
 
@@ -124,20 +141,6 @@ route_table_public = ec2.RouteTable(
     ],
 )
 
-route_table_private = ec2.RouteTable(
-    "private",
-    tags={
-        "Name": "private",
-    },
-    vpc_id=vpc.id,
-    routes=[
-        ec2.RouteTableRouteArgs(
-            cidr_block="0.0.0.0/0",
-            nat_gateway_id=ngws[0].id,
-        )
-    ],
-)
-
 """
 Create route table associations
 """
@@ -149,10 +152,19 @@ for i in range(len(subnets_public)):
         subnet_id=subnets_public[i].id,
     )
 
-for i in range(len(subnets_private)):
-    az = azs.names[ i % len(azs.names) ]
-    ec2.route_table_association.RouteTableAssociation(
-        f"private-{az}",
-        route_table_id=route_table_private.id,
-        subnet_id=subnets_public[i].id,
-    )
+if len(rts_private) > 0:
+    for i in range(len(subnets_private)):
+        az = azs.names[ i % len(azs.names) ]
+        ec2.route_table_association.RouteTableAssociation(
+            f"private-{az}",
+            route_table_id=rts_private[i].id,
+            subnet_id=subnets_public[i].id,
+        )
+else:
+    for i in range(len(subnets_private)):
+        az = azs.names[ i % len(azs.names) ]
+        ec2.route_table_association.RouteTableAssociation(
+            f"private-{az}",
+            route_table_id=rts_private[0].id,
+            subnet_id=subnets_public[i].id,
+        )

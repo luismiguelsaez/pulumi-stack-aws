@@ -1,10 +1,14 @@
 from pulumi import get_stack, StackReference, Config, ResourceOptions
 from pulumi_aws import eks
+from pulumi_aws.iam import OpenIdConnectProvider
 import json
 from . import iam
+from tools import http
 
 config = Config()
 org = config.require("org")
+
+aws_config = Config("aws")
 
 """
 Get VPC resources
@@ -37,6 +41,23 @@ eks_cluster = eks.Cluster(
         "Name": f"{eks_name_prefix}",
         "Environment": env
     }
+)
+
+#identity_provider = eks.IdentityProviderConfig(
+#    f"{eks_name_prefix}-oidc",
+#    cluster_name=eks_cluster.name,
+#    oidc=eks.IdentityProviderConfigOidcArgs(
+#        issuer_url=eks_cluster.identities[0].oidcs[0].issuer,
+#    )
+#)
+
+oidc_fingerprint = http.get_ssl_cert_fingerprint(host=f"oidc.eks.{aws_config.require('region')}.amazonaws.com")
+oidc_provider = OpenIdConnectProvider(
+    f"{eks_name_prefix}-oidc-provider",
+    client_id_lists=["sts.amazonaws.com"],
+    thumbprint_lists=[oidc_fingerprint],
+    url=eks_cluster.identities[0].oidcs[0].issuer,
+    opts=ResourceOptions(depends_on=[eks_cluster]),
 )
 
 """

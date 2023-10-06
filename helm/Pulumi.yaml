@@ -1,0 +1,13 @@
+name: helm
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: Helm charts
+
+config:
+  org: luismiguelsaez
+
+  aws:region: eu-central-1
+
+  charts:karpenter_version: "0.16.3"

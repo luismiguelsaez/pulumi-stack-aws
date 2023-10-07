@@ -1,4 +1,4 @@
-name: network
+name: network-main
 runtime:
   name: python
   options:

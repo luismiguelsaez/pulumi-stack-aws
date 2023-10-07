@@ -1,3 +1,0 @@
-config:
-  aws:profile: dev
-  eks:version: "1.27"

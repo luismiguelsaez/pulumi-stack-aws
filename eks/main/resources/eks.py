@@ -14,7 +14,7 @@ aws_config = Config("aws")
 Get VPC resources
 """
 env = get_stack()
-network = StackReference(f"{org}/network/{env}")
+network = StackReference(f"{org}/network-main/{env}")
 
 """
 Get EKS config

@@ -2,6 +2,10 @@ from os import name
 from pulumi_aws import ec2, get_availability_zones
 import pulumi
 import ipaddress
+from .tags import common_tags
+
+project = pulumi.get_project()
+env = pulumi.get_stack()
 
 network_config = pulumi.Config("network")
 vpc_cidr = network_config.require("cidr")
@@ -10,9 +14,6 @@ name_prefix = network_config.require("name_prefix")
 
 discovery_config = pulumi.Config("discovery")
 
-"""
-Set common tags
-"""
 discovery_tags = {
     "karpenter.sh/discovery": name_prefix,
 }
@@ -27,7 +28,7 @@ vpc = ec2.Vpc(
     enable_dns_support=True,
     tags={
         "Name": f"{name_prefix}",
-    },
+    } | common_tags,
 )
 
 """
@@ -52,7 +53,7 @@ for i in range(network_config.require_int("azs") * 2):
                 availability_zone=az,
                 cidr_block=str(list(ipaddress.IPv4Network(vpc_cidr).subnets(new_prefix=subnet_mask))[i]),
                 map_public_ip_on_launch=False,
-                tags=tags | discovery_tags,
+                tags=tags | common_tags | discovery_tags,
                 vpc_id=vpc.id,
             )
         )
@@ -65,7 +66,7 @@ for i in range(network_config.require_int("azs") * 2):
                 availability_zone=az,
                 cidr_block=str(list(ipaddress.IPv4Network(vpc_cidr).subnets(new_prefix=subnet_mask))[i]),
                 map_public_ip_on_launch=False,
-                tags=tags | discovery_tags,
+                tags=tags | common_tags | discovery_tags,
                 vpc_id=vpc.id,
             )
         )
@@ -77,7 +78,7 @@ igw = ec2.InternetGateway(
     f"{name_prefix}",
     tags={
         "Name": f"{name_prefix}",
-    },
+    } | common_tags,
     vpc_id=vpc.id,
 )
 
@@ -101,7 +102,7 @@ for i in range(ngw_count):
             f"{name_prefix}-{az}",
             tags={
                 "Name": f"{name_prefix}-{az}",
-            },
+            } | common_tags,
         )
     )
 
@@ -112,7 +113,7 @@ for i in range(ngw_count):
             subnet_id=subnets_public[i].id,
             tags={
                 "Name": f"{name_prefix}-{az}",
-            },
+            } | common_tags,
         )
     )
     
@@ -121,7 +122,7 @@ for i in range(ngw_count):
             f"{name_prefix}-private-{az}",
             tags={
                 "Name": f"{name_prefix}-private-{az}",
-            },
+            } | common_tags,
             vpc_id=vpc.id,
             routes=[
                 ec2.RouteTableRouteArgs(
@@ -140,7 +141,7 @@ route_table_public = ec2.RouteTable(
     f"{name_prefix}-public",
     tags={
         "Name": f"{name_prefix}-public",
-    },
+    } | common_tags,
     vpc_id=vpc.id,
     routes=[
         ec2.RouteTableRouteArgs(

@@ -1,9 +1,10 @@
-from pulumi import get_stack, StackReference, Config, ResourceOptions
+from pulumi import get_stack, get_project, StackReference, Config, ResourceOptions
 from pulumi_aws import eks
 from pulumi_aws.iam import OpenIdConnectProvider
 import json
 from . import iam
 from tools import http
+from .tags import common_tags
 
 config = Config()
 org = config.require("org")
@@ -39,8 +40,7 @@ eks_cluster = eks.Cluster(
     ),
     tags={
         "Name": f"{eks_name_prefix}",
-        "Environment": env
-    }
+    } | common_tags,
 )
 
 """
@@ -52,6 +52,9 @@ oidc_provider = OpenIdConnectProvider(
     client_id_lists=["sts.amazonaws.com"],
     thumbprint_lists=[oidc_fingerprint],
     url=eks_cluster.identities[0].oidcs[0].issuer,
+    tags={
+        "Name": f"{eks_name_prefix}-oidc-provider",
+    } | common_tags,
     opts=ResourceOptions(depends_on=[eks_cluster]),
 )
 
@@ -73,6 +76,9 @@ eks_nodegroup_system = eks.NodeGroup(
     capacity_type="ON_DEMAND",
     ami_type="BOTTLEROCKET_ARM_64",
     disk_size=20,
+    tags={
+        "Name": f"{eks_name_prefix}-system",
+    } | common_tags,
 )
 
 """
@@ -99,5 +105,8 @@ eks_addon_coredns = eks.Addon(
             }
         }
     ),
+    tags={
+        "Name": f"{eks_name_prefix}-coredns",
+    } | common_tags,
     opts=ResourceOptions(depends_on=[eks_nodegroup_system])
 )

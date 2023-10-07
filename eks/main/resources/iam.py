@@ -1,10 +1,13 @@
 from pulumi_aws.iam import Role, RolePolicyAttachment, InstanceProfile
-from pulumi import get_project, get_stack
+from pulumi import get_project, get_stack, Config
 import json
 from .tags import common_tags
 
+eks_config = Config("eks")
+name_prefix = eks_config.require("name_prefix")
+
 eks_cluster_role = Role(
-    "eks-cluster-role",
+    f"eks-{name_prefix}-cluster",
     assume_role_policy=json.dumps(
         {
             "Version": "2012-10-17",
@@ -21,33 +24,27 @@ eks_cluster_role = Role(
         }
     ),
     tags={
-        "Name": "eks-cluster-role",
+        "Name": f"eks-{name_prefix}-cluster",
     } | common_tags,
 )
 
 RolePolicyAttachment(
-    "AmazonEKSClusterPolicy",
+    f"eks-{name_prefix}-AmazonEKSClusterPolicy",
     policy_arn="arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
     role=eks_cluster_role.name,
-    tags={
-        "Name": "AmazonEKSClusterPolicy",
-    } | common_tags,
 )
 
 RolePolicyAttachment(
-    "AmazonEKSServicePolicy",
+    f"eks-{name_prefix}-AmazonEKSServicePolicy",
     policy_arn="arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
     role=eks_cluster_role.name,
-    tags={
-        "Name": "AmazonEKSServicePolicy",
-    } | common_tags,
 )
 
 """
 Node IAM role
 """
 eks_node_role = Role(
-    "eks-node-role",
+    f"eks-{name_prefix}-node",
     assume_role_policy=json.dumps(
         {
             "Version": "2012-10-17",
@@ -64,41 +61,32 @@ eks_node_role = Role(
         }
     ),
     tags={
-        "Name": "eks-node-role",
+        "Name": f"eks-{name_prefix}-node",
     } | common_tags,
 )
 
 eks_node_role_instance_profile = InstanceProfile(
-    "eks-node-role",
+    f"eks-{name_prefix}-node",
     role=eks_node_role.name,
     tags={
-        "Name": "eks-node-role",
+        "Name": f"eks-{name_prefix}-node",
     } | common_tags,
 )
 
 RolePolicyAttachment(
-    "eks-nodegroup-AmazonEKSWorkerNodePolicy",
+    f"eks-{name_prefix}-node-AmazonEKSWorkerNodePolicy",
     policy_arn="arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
     role=eks_node_role.name,
-    tags={
-        "Name": "AmazonEKSWorkerNodePolicy",
-    } | common_tags,
 )
 
 RolePolicyAttachment(
-    "eks-nodegroup-AmazonEKS_CNI_Policy",
+    f"eks-{name_prefix}-node-AmazonEKS_CNI_Policy",
     policy_arn="arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
     role=eks_node_role.name,
-    tags={
-        "Name": "AmazonEKS_CNI_Policy",
-    } | common_tags,
 )
 
 RolePolicyAttachment(
-    "eks-nodegroup-AmazonEC2ContainerRegistryReadOnly",
+    f"eks-{name_prefix}-node-AmazonSSMManagedInstanceCore",
     policy_arn="arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
     role=eks_node_role.name,
-    tags={
-        "Name": "AmazonEC2ContainerRegistryReadOnly",
-    } | common_tags,
 )

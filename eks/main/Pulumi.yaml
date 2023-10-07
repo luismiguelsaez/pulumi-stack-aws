@@ -11,4 +11,4 @@ config:
   aws:region: eu-central-1
 
   eks:version: "1.27"
-  eks:name_prefix: "main"
+  eks:name_prefix: main

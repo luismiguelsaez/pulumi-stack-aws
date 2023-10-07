@@ -48,12 +48,12 @@ Create EKS OIDC provider
 """
 oidc_fingerprint = http.get_ssl_cert_fingerprint(host=f"oidc.eks.{aws_config.require('region')}.amazonaws.com")
 oidc_provider = OpenIdConnectProvider(
-    f"{eks_name_prefix}-oidc-provider",
+    f"eks-{eks_name_prefix}",
     client_id_lists=["sts.amazonaws.com"],
     thumbprint_lists=[oidc_fingerprint],
     url=eks_cluster.identities[0].oidcs[0].issuer,
     tags={
-        "Name": f"{eks_name_prefix}-oidc-provider",
+        "Name": f"eks-{eks_name_prefix}",
     } | common_tags,
     opts=ResourceOptions(depends_on=[eks_cluster]),
 )

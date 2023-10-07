@@ -167,3 +167,66 @@ RolePolicyAttachment(
     role=karpenter_role.name,
     policy_arn=karpenter_policy.arn
 )
+
+cluster_autoscaler_policy = Policy(
+    "cluster-autoscaler-policy",
+    name="cluster-autoscaler-policy",
+    policy=Output.json_dumps(
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "ClusterAutoscaler",
+                    "Effect": "Allow",
+                    "Action": [
+                        "autoscaling:DescribeAutoScalingGroups",
+                        "autoscaling:DescribeAutoScalingInstances",
+                        "autoscaling:DescribeLaunchConfigurations",
+                        "autoscaling:DescribeTags",
+                        "ec2:DescribeInstanceTypes",
+                        "ec2:DescribeLaunchTemplateVersions",
+                        "autoscaling:SetDesiredCapacity",
+                        "autoscaling:TerminateInstanceInAutoScalingGroup",
+                        "ec2:DescribeInstanceTypes",
+                        "eks:DescribeNodegroup"
+                    ],
+                    "Resource": "*"
+                }
+            ]
+        }
+    ),
+    tags={
+        "Name": "cluster-autoscaler-policy",
+        "Environment": env
+    }
+)
+
+cluster_autoscaler_role = Role(
+    "cluster-autoscaler-role",
+    name="cluster-autoscaler-role",
+    assume_role_policy=Output.json_dumps(
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "",
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Federated": eks.get_output("eks_oidc_provider_arn")
+                    },
+                    "Action": "sts:AssumeRoleWithWebIdentity"
+                }
+            ]
+        }
+    ),
+    tags={
+        "Name": "cluster-autoscaler-role",
+        "Environment": env
+    }
+)
+
+RolePolicyAttachment(
+    "cluster-autoscaler-policy-attachment",
+    role=cluster_autoscaler_role.name,
+    policy_arn=cluster_autoscaler_policy.arn
+)

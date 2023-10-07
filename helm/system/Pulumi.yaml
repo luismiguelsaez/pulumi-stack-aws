@@ -10,5 +10,7 @@ config:
 
   aws:region: eu-central-1
 
+  helm:name_prefix: system
+
   charts:karpenter_version: "0.16.3"
   charts:cluster_autoscaler_version: "9.29.3"

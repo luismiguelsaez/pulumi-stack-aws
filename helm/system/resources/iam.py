@@ -1,9 +1,13 @@
 from pulumi_aws.iam import Role, Policy, RolePolicyAttachment, InstanceProfile
 from pulumi import get_stack, StackReference, Config, Output
 import json
+from .tags import common_tags
 
 config = Config()
 org = config.require("org")
+
+helm_config = Config("helm")
+name_prefix = helm_config.require("name_prefix")
 
 """
 Get EKS resources
@@ -18,7 +22,7 @@ eks = StackReference(
 Create IAM roles
 """
 karpenter_node_role = Role(
-    "karpenter-node-role",
+    f"helm-{name_prefix}-karpenter-node",
     name="karpenter-node-role",
     assume_role_policy=json.dumps(
         {
@@ -36,19 +40,17 @@ karpenter_node_role = Role(
         }
     ),
     tags={
-        "Name": "karpenter-node-role",
-        "Environment": env
-    }
+        f"helm-{name_prefix}-karpenter-node",
+    } | common_tags
 )
 
 karpenter_node_role_instance_profile = InstanceProfile(
-    "karpenter-node-role-instance-profile",
+    f"helm-{name_prefix}-karpenter-node",
     name="karpenter-node-role-instance-profile",
     role=karpenter_node_role.name,
     tags={
         "Name": "karpenter-node-role-instance-profile",
-        "Environment": env
-    }
+    } | common_tags
 )
 
 RolePolicyAttachment(
@@ -76,7 +78,7 @@ RolePolicyAttachment(
 )
 
 karpenter_policy = Policy(
-    "karpenter-policy",
+    f"helm-{name_prefix}-karpenter-controller",
     name="karpenter-policy",
     policy=Output.json_dumps(
         {
@@ -133,13 +135,12 @@ karpenter_policy = Policy(
         }
     ),
     tags={
-        "Name": "karpenter-policy",
-        "Environment": env
-    }
+        "Name": f"helm-{name_prefix}-karpenter-controller",
+    } | common_tags
 )
 
 karpenter_role = Role(
-    "karpenter-role",
+    f"helm-{name_prefix}-karpenter-controller",
     name="karpenter-role",
     assume_role_policy=Output.json_dumps(
         {
@@ -157,9 +158,8 @@ karpenter_role = Role(
         }
     ),
     tags={
-        "Name": "karpenter-role",
-        "Environment": env
-    }
+        "Name": f"helm-{name_prefix}-karpenter-controller",
+    } | common_tags
 )
 
 RolePolicyAttachment(
@@ -169,7 +169,7 @@ RolePolicyAttachment(
 )
 
 cluster_autoscaler_policy = Policy(
-    "cluster-autoscaler-policy",
+    f"helm-{name_prefix}-cluster-autoscaller-controller",
     name="cluster-autoscaler-policy",
     policy=Output.json_dumps(
         {
@@ -196,13 +196,12 @@ cluster_autoscaler_policy = Policy(
         }
     ),
     tags={
-        "Name": "cluster-autoscaler-policy",
-        "Environment": env
-    }
+        "Name": f"helm-{name_prefix}-cluster-autoscaller-controller",
+    } | common_tags
 )
 
 cluster_autoscaler_role = Role(
-    "cluster-autoscaler-role",
+    f"helm-{name_prefix}-cluster-autoscaller-controller",
     name="cluster-autoscaler-role",
     assume_role_policy=Output.json_dumps(
         {
@@ -220,9 +219,8 @@ cluster_autoscaler_role = Role(
         }
     ),
     tags={
-        "Name": "cluster-autoscaler-role",
-        "Environment": env
-    }
+        "Name": f"helm-{name_prefix}-cluster-autoscaller-controller",
+    } | common_tags
 )
 
 RolePolicyAttachment(

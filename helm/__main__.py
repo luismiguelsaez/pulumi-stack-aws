@@ -12,7 +12,7 @@ charts = Config("charts")
 Get EKS resources
 """
 env = get_stack()
-eks = StackReference(f"{org}/eks/{env}")
+eks = StackReference(f"{org}/eks-main/{env}")
 
 """
 Create Kubernetes provider from EKS kubeconfig
@@ -44,7 +44,7 @@ karpenter_helm_release = Release(
         "clusterName": eks.get_output("eks_cluster_name"),
         "clusterEndpoint": eks.get_output("eks_cluster_endpoint"),
         "aws": {
-            "defaultInstanceProfile": ""
+            "defaultInstanceProfile": iam.karpenter_node_role_instance_profile.name,
         },
     },
     opts=ResourceOptions(provider=k8s_provider)

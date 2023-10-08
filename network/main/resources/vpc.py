@@ -3,16 +3,11 @@ from pulumi_aws import ec2, get_availability_zones
 import pulumi
 import ipaddress
 from .tags import common_tags
+from stack import network_config
 
-project = pulumi.get_project()
-env = pulumi.get_stack()
-
-network_config = pulumi.Config("network")
 vpc_cidr = network_config.require("cidr")
 subnet_mask = network_config.require_int("subnet_mask")
 name_prefix = network_config.require("name_prefix")
-
-discovery_config = pulumi.Config("discovery")
 
 discovery_tags = {
     "karpenter.sh/discovery": name_prefix,

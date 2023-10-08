@@ -2,18 +2,8 @@ from pulumi import get_stack, export, StackReference, Config, ResourceOptions
 from pulumi_kubernetes import Provider
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
 from resources import iam
+from stack import aws_config, charts_config, eks
 
-config = Config()
-org = config.require("org")
-
-charts = Config("charts")
-aws_config = Config("aws")
-
-"""
-Get EKS resources
-"""
-env = get_stack()
-eks = StackReference(f"{org}/eks-main/{env}")
 
 """
 Create Kubernetes provider from EKS kubeconfig
@@ -28,7 +18,7 @@ karpenter_helm_release = Release(
     repository_opts=RepositoryOptsArgs(
         repo="https://charts.karpenter.sh"
     ),
-    version=charts.require("karpenter_version"),
+    version=charts_config.require("karpenter_version"),
     chart="karpenter",
     namespace="kube-system",
     name="karpenter",
@@ -56,7 +46,7 @@ cluster_autoscaler_helm_release = Release(
     repository_opts=RepositoryOptsArgs(
         repo="https://kubernetes.github.io/autoscaler"
     ),
-    version=charts.require("cluster_autoscaler_version"),
+    version=charts_config.require("cluster_autoscaler_version"),
     chart="cluster-autoscaler",
     namespace="kube-system",
     name="cluster-autoscaler",

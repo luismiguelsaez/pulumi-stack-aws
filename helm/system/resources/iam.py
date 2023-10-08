@@ -2,21 +2,12 @@ from pulumi_aws.iam import Role, Policy, RolePolicyAttachment, InstanceProfile
 from pulumi import get_stack, StackReference, Config, Output
 import json
 from .tags import common_tags
+from stack import helm_config, eks
 
 config = Config()
 org = config.require("org")
 
-helm_config = Config("helm")
 name_prefix = helm_config.require("name_prefix")
-
-"""
-Get EKS resources
-"""
-env = get_stack()
-eks = StackReference(
-    name="iam-eks",
-    stack_name=f"{org}/eks-main/{env}"
-)
 
 """
 Create IAM roles
@@ -40,7 +31,7 @@ karpenter_node_role = Role(
         }
     ),
     tags={
-        f"helm-{name_prefix}-karpenter-node",
+        "Name": f"helm-{name_prefix}-karpenter-node",
     } | common_tags
 )
 

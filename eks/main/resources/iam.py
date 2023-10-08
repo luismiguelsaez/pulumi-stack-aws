@@ -1,9 +1,9 @@
 from pulumi_aws.iam import Role, RolePolicyAttachment, InstanceProfile
-from pulumi import get_project, get_stack, Config
+from pulumi import Config
 import json
 from .tags import common_tags
+from stack import eks_config
 
-eks_config = Config("eks")
 name_prefix = eks_config.require("name_prefix")
 
 eks_cluster_role = Role(

@@ -1,26 +1,13 @@
-from pulumi import get_stack, get_project, StackReference, Config, ResourceOptions
+from pulumi import get_stack, StackReference, Config, ResourceOptions
 from pulumi_aws import eks
 from pulumi_aws.iam import OpenIdConnectProvider
 import json
-from . import iam
+from . import iam, ec2
 from tools import http
 from .tags import common_tags
+from stack import network, aws_config, eks_config
 
-config = Config()
-org = config.require("org")
 
-aws_config = Config("aws")
-
-"""
-Get VPC resources
-"""
-env = get_stack()
-network = StackReference(f"{org}/network-main/{env}")
-
-"""
-Get EKS config
-"""
-eks_config = Config("eks")
 eks_name_prefix = eks_config.require("name_prefix")
 eks_version = eks_config.require("version")
 
@@ -36,7 +23,7 @@ eks_cluster = eks.Cluster(
         endpoint_public_access=True,
         public_access_cidrs=["0.0.0.0/0"],
         subnet_ids=network.get_output("subnets_private"),
-        security_group_ids=[]
+        security_group_ids=[ec2.eks_cluster_node_security_group.id]
     ),
     tags={
         "Name": f"{eks_name_prefix}",

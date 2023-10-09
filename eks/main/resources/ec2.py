@@ -1,8 +1,8 @@
 from pulumi_aws.ec2 import SecurityGroup, SecurityGroupEgressArgs, SecurityGroupIngressArgs
-from stack import network, common_tags, discovery_tags, eks_name_prefix
+from stack import network, common_tags, discovery_tags, name_prefix
 
 eks_cluster_node_security_group = SecurityGroup(
-    f"eks-{eks_name_prefix}-cluster-node-security-group",
+    f"eks-{name_prefix}-cluster-node-security-group",
     name="eks-cluster-node-security-group",
     description="Security group for EKS cluster nodes",
     vpc_id=network.get_output("vpc_id"),
@@ -25,6 +25,6 @@ eks_cluster_node_security_group = SecurityGroup(
         )
     ],
     tags={
-        "Name": f"eks-{eks_name_prefix}-cluster-node-security-group",
+        "Name": f"eks-{name_prefix}-cluster-node-security-group",
     } | common_tags | discovery_tags,
 )

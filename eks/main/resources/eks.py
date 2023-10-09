@@ -4,14 +4,14 @@ from pulumi_aws.iam import OpenIdConnectProvider
 import json
 from . import iam, ec2
 from tools import http
-from stack import network, aws_config, common_tags, discovery_tags, eks_name_prefix, eks_version
+from stack import network, aws_config, common_tags, discovery_tags, name_prefix, eks_version
 
 """
 Create EKS cluster
 """
 eks_cluster = eks.Cluster(
-    name=f"{eks_name_prefix}",
-    resource_name=f"{eks_name_prefix}",
+    name=f"{name_prefix}",
+    resource_name=f"{name_prefix}",
     version=eks_version,
     role_arn=iam.eks_cluster_role.arn,
     vpc_config=eks.ClusterVpcConfigArgs(
@@ -22,7 +22,7 @@ eks_cluster = eks.Cluster(
         security_group_ids=[ec2.eks_cluster_node_security_group.id]
     ),
     tags={
-        "Name": f"{eks_name_prefix}",
+        "Name": f"{name_prefix}",
     } | common_tags | discovery_tags,
 )
 
@@ -31,12 +31,12 @@ Create EKS OIDC provider
 """
 oidc_fingerprint = http.get_ssl_cert_fingerprint(host=f"oidc.eks.{aws_config.require('region')}.amazonaws.com")
 oidc_provider = OpenIdConnectProvider(
-    f"eks-{eks_name_prefix}",
+    f"eks-{name_prefix}",
     client_id_lists=["sts.amazonaws.com"],
     thumbprint_lists=[oidc_fingerprint],
     url=eks_cluster.identities[0].oidcs[0].issuer,
     tags={
-        "Name": f"eks-{eks_name_prefix}",
+        "Name": f"eks-{name_prefix}",
     } | common_tags,
     opts=ResourceOptions(depends_on=[eks_cluster]),
 )
@@ -45,9 +45,9 @@ oidc_provider = OpenIdConnectProvider(
 Create EKS node group
 """
 eks_nodegroup_system = eks.NodeGroup(
-    resource_name=f"{eks_name_prefix}-system",
+    resource_name=f"{name_prefix}-system",
     cluster_name=eks_cluster.name,
-    node_group_name=f"{eks_name_prefix}-system",
+    node_group_name=f"{name_prefix}-system",
     node_role_arn=iam.eks_node_role.arn,
     subnet_ids=network.get_output("subnets_private"),
     scaling_config=eks.NodeGroupScalingConfigArgs(
@@ -60,7 +60,7 @@ eks_nodegroup_system = eks.NodeGroup(
     ami_type="BOTTLEROCKET_ARM_64",
     disk_size=20,
     tags={
-        "Name": f"{eks_name_prefix}-system",
+        "Name": f"{name_prefix}-system",
     } | common_tags,
 )
 
@@ -68,7 +68,7 @@ eks_nodegroup_system = eks.NodeGroup(
 Addons setup
 """
 eks_addon_coredns = eks.Addon(
-    resource_name=f"{eks_name_prefix}-coredns",
+    resource_name=f"{name_prefix}-coredns",
     cluster_name=eks_cluster.name,
     addon_name="coredns",
     resolve_conflicts_on_create="OVERWRITE",
@@ -89,7 +89,7 @@ eks_addon_coredns = eks.Addon(
         }
     ),
     tags={
-        "Name": f"{eks_name_prefix}-coredns",
+        "Name": f"{name_prefix}-coredns",
     } | common_tags,
     opts=ResourceOptions(depends_on=[eks_nodegroup_system])
 )

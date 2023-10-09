@@ -4,16 +4,13 @@ from pulumi_aws.iam import OpenIdConnectProvider
 import json
 from . import iam, ec2
 from tools import http
-from stack import network, aws_config, eks_config, common_tags
-
-
-eks_name_prefix = eks_config.require("name_prefix")
-eks_version = eks_config.require("version")
+from stack import network, aws_config, common_tags, eks_name_prefix, eks_version
 
 """
 Create EKS cluster
 """
 eks_cluster = eks.Cluster(
+    name=f"{eks_name_prefix}",
     resource_name=f"{eks_name_prefix}",
     version=eks_version,
     role_arn=iam.eks_cluster_role.arn,

@@ -1,7 +1,7 @@
 from pulumi import ResourceOptions
 from pulumi_kubernetes import Provider
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
-from resources import iam, k8s
+from resources import iam
 from stack import aws_config, charts_config, eks
 from pulumi_kubernetes.yaml import ConfigGroup
 
@@ -28,7 +28,7 @@ karpenter_helm_release = Release(
         },
         "serviceAccount": {
             "create": True,
-            "anntations": {
+            "annotations": {
                 "eks.amazonaws.com/role-arn": iam.karpenter_role.arn,
             }
         },
@@ -40,13 +40,6 @@ karpenter_helm_release = Release(
         },
     },
     opts=ResourceOptions(provider=k8s_provider)
-)
-
-karpenter_awsnodetemplates = ConfigGroup(
-    "karpenter-awsnodetemplates",
-    objs=[
-        k8s.karpenter_awsnodetemplate,
-    ],
 )
 
 cluster_autoscaler_helm_release = Release(

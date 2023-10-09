@@ -7,9 +7,16 @@ org = Config().require("org")
 project = get_project()
 env = get_stack()
 
+eks_name_prefix = eks_config.require("name_prefix")
+eks_version = eks_config.require("version")
+
 common_tags = {
     "pulumi:project": project,
     "pulumi:stack": env,
+}
+
+discovery_tags = {
+    "karpenter.sh/discovery": eks_name_prefix,
 }
 
 """

@@ -7,7 +7,13 @@ org = Config().require("org")
 project = get_project()
 env = get_stack()
 
+name_prefix = network_config.require("name_prefix")
+
 common_tags = {
     "pulumi:project": project,
     "pulumi:stack": env,
+}
+
+discovery_tags = {
+    "karpenter.sh/discovery": name_prefix,
 }

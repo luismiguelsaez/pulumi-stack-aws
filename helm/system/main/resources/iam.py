@@ -1,7 +1,7 @@
 from pulumi_aws.iam import Role, Policy, RolePolicyAttachment, InstanceProfile
 from pulumi import Config, Output
 import json
-from stack import eks, common_tags, name_prefix
+from helm.system.main.stack import eks, common_tags, name_prefix
 
 
 """

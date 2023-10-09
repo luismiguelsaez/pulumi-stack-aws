@@ -18,4 +18,4 @@ common_tags = {
 """
 Stack references
 """
-eks = StackReference(f"{org}/eks-main/{env}")
+eks = StackReference(f"{org}/eks-{name_prefix}/{env}")

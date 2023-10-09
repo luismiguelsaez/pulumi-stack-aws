@@ -22,4 +22,4 @@ discovery_tags = {
 """
 Stack references
 """
-network = StackReference(f"{org}/network-main/{env}")
+network = StackReference(f"{org}/network-{name_prefix}/{env}")

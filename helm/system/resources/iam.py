@@ -1,12 +1,8 @@
 from pulumi_aws.iam import Role, Policy, RolePolicyAttachment, InstanceProfile
 from pulumi import Config, Output
 import json
-from stack import helm_config, eks, common_tags
+from stack import eks, common_tags, name_prefix
 
-config = Config()
-org = config.require("org")
-
-name_prefix = helm_config.require("name_prefix")
 
 """
 Create IAM roles

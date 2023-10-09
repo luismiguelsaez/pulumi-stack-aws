@@ -8,6 +8,8 @@ org = Config().require("org")
 project = get_project()
 env = get_stack()
 
+name_prefix = helm_config.require("name_prefix")
+
 common_tags = {
     "pulumi:project": project,
     "pulumi:stack": env,

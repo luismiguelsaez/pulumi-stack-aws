@@ -8,6 +8,24 @@ eks_cluster_node_security_group = SecurityGroup(
     name="eks-cluster-node-security-group",
     description="Security group for EKS cluster nodes",
     vpc_id=network.get_output("vpc_id"),
+    egress=[
+        SecurityGroupRule(
+            description="Allow all outbound traffic by default",
+            protocol="-1",
+            from_port=0,
+            to_port=0,
+            cidr_blocks=["0.0.0.0/0"],
+        )
+    ],
+    ingress=[
+        SecurityGroupRule(
+            description="Allow SSH connections from anywhere",
+            protocol="tcp",
+            from_port=22,
+            to_port=22,
+            cidr_blocks=["0.0.0.0/0"],
+        )
+    ],
     tags={
         "Name": f"eks-{name_prefix}-cluster-node-security-group",
     } | common_tags,

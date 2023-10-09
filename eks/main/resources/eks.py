@@ -4,7 +4,7 @@ from pulumi_aws.iam import OpenIdConnectProvider
 import json
 from . import iam, ec2
 from tools import http
-from stack import network, aws_config, common_tags, eks_name_prefix, eks_version
+from stack import network, aws_config, common_tags, discovery_tags, eks_name_prefix, eks_version
 
 """
 Create EKS cluster
@@ -23,7 +23,7 @@ eks_cluster = eks.Cluster(
     ),
     tags={
         "Name": f"{eks_name_prefix}",
-    } | common_tags,
+    } | common_tags | discovery_tags,
 )
 
 """

@@ -1,11 +1,7 @@
 from os import name
 from pulumi_aws import ec2, get_availability_zones
 import ipaddress
-from stack import network_config, common_tags, discovery_tags
-
-vpc_cidr = network_config.require("cidr")
-subnet_mask = network_config.require_int("subnet_mask")
-name_prefix = network_config.require("name_prefix")
+from stack import network_config, common_tags, discovery_tags, vpc_cidr, subnet_mask, name_prefix
 
 """
 Create VPC

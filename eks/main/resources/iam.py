@@ -1,8 +1,6 @@
 from pulumi_aws.iam import Role, RolePolicyAttachment, InstanceProfile
-from pulumi import Config
 import json
-from .tags import common_tags
-from stack import eks_config
+from stack import eks_config, common_tags
 
 name_prefix = eks_config.require("name_prefix")
 

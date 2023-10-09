@@ -1,7 +1,5 @@
 from pulumi_aws.ec2 import SecurityGroup, SecurityGroupRule
-from pulumi import Config, get_stack, StackReference
-from .tags import common_tags
-from stack import network, eks_config
+from stack import network, eks_config, common_tags
 
 name_prefix = eks_config.require("name_prefix")
 

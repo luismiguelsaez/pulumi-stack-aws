@@ -1,11 +1,10 @@
-from pulumi import get_stack, StackReference, Config, ResourceOptions
+from pulumi import ResourceOptions
 from pulumi_aws import eks
 from pulumi_aws.iam import OpenIdConnectProvider
 import json
 from . import iam, ec2
 from tools import http
-from .tags import common_tags
-from stack import network, aws_config, eks_config
+from stack import network, aws_config, eks_config, common_tags
 
 
 eks_name_prefix = eks_config.require("name_prefix")

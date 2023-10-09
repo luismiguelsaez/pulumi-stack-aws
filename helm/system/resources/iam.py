@@ -1,8 +1,7 @@
 from pulumi_aws.iam import Role, Policy, RolePolicyAttachment, InstanceProfile
-from pulumi import get_stack, StackReference, Config, Output
+from pulumi import Config, Output
 import json
-from .tags import common_tags
-from stack import helm_config, eks
+from stack import helm_config, eks, common_tags
 
 config = Config()
 org = config.require("org")

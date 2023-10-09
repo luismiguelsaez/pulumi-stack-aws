@@ -1,9 +1,9 @@
-from pulumi import get_stack, export, StackReference, Config, ResourceOptions
+from pulumi import ResourceOptions
 from pulumi_kubernetes import Provider
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
-from resources import iam
+from resources import iam, k8s
 from stack import aws_config, charts_config, eks
-
+from pulumi_kubernetes.yaml import ConfigGroup
 
 """
 Create Kubernetes provider from EKS kubeconfig
@@ -36,9 +36,17 @@ karpenter_helm_release = Release(
         "clusterEndpoint": eks.get_output("eks_cluster_endpoint"),
         "aws": {
             "defaultInstanceProfile": iam.karpenter_node_role_instance_profile.name,
+            "vmMemoryOverheadPercent": 0.075
         },
     },
     opts=ResourceOptions(provider=k8s_provider)
+)
+
+karpenter_awsnodetemplates = ConfigGroup(
+    "karpenter-awsnodetemplates",
+    objs=[
+        k8s.karpenter_awsnodetemplate,
+    ],
 )
 
 cluster_autoscaler_helm_release = Release(

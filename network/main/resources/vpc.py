@@ -1,9 +1,7 @@
 from os import name
 from pulumi_aws import ec2, get_availability_zones
-import pulumi
 import ipaddress
-from .tags import common_tags
-from stack import network_config
+from stack import network_config, common_tags
 
 vpc_cidr = network_config.require("cidr")
 subnet_mask = network_config.require_int("subnet_mask")

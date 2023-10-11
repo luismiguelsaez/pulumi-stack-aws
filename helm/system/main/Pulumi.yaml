@@ -1,4 +1,4 @@
-name: helm-system
+name: helm-system-main
 runtime:
   name: python
   options:

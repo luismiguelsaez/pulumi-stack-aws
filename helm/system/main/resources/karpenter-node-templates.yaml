@@ -1,0 +1,33 @@
+apiVersion: karpenter.k8s.aws/v1alpha1
+kind: AWSNodeTemplate
+metadata:
+  annotations: {}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels: {}
+  name: al2-default
+spec:
+  amiFamily: AL2
+  blockDeviceMappings:
+  - deviceName: /dev/xvda
+    ebs:
+      encrypted: true
+      volumeSize: 20Gi
+      volumeType: gp3
+  metadataOptions:
+    httpEndpoint: enabled
+    httpProtocolIPv6: disabled
+    httpPutResponseHopLimit: 2
+    httpTokens: required
+  securityGroupSelector:
+    karpenter.sh/discovery: ""
+  subnetSelector:
+    karpenter.sh/discovery: ""
+  userData: |
+    MIME-Version: 1.0
+    Content-Type: multipart/mixed; boundary="BOUNDARY"
+
+    --BOUNDARY
+    Content-Type: text/x-shellscript; charset="us-ascii"
+
+    --BOUNDARY--

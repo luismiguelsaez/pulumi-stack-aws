@@ -1,9 +1,10 @@
 from pulumi import ResourceOptions
 from pulumi_kubernetes import Provider
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
-from resources import iam
+from resources import iam, k8s
 from stack import aws_config, charts_config, eks
 from pulumi_kubernetes.yaml import ConfigGroup
+from yaml import safe_load
 
 """
 Create Kubernetes provider from EKS kubeconfig
@@ -71,4 +72,13 @@ cluster_autoscaler_helm_release = Release(
         },
     },
     opts=ResourceOptions(provider=k8s_provider)
+)
+
+"""
+Provision Karpenter AWSNodetemplates
+"""
+karpenter_node_templates = ConfigGroup(
+    "karpenter-node-templates",
+    opts=ResourceOptions(provider=k8s_provider),
+    yaml=safe_load(k8s.karpenter_awsnodetemplate_al2_default)
 )

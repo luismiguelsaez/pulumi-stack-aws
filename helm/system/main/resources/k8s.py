@@ -20,7 +20,7 @@ userdata_al2_default = f"""
     --BOUNDARY--
 """
 
-karpenter_awsnodetemplate = {
+karpenter_awsnodetemplate_al2_default = {
     "apiVersion": "karpenter.k8s.aws/v1alpha1",
     "kind": "AWSNodeTemplate",
     "metadata": {

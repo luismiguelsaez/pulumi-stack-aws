@@ -4,7 +4,14 @@ from pulumi import ResourceOptions, Output
 from os import path
 import glob
 
-def karpenter_templates(name: str, provider: Provider, manifests_path: str, eks_cluster_name: Output, ssh_public_key: str, depends_on: list = []):
+def karpenter_templates(
+    name: str,
+    provider: Provider,
+    manifests_path: str,
+    eks_cluster_name: Output,
+    ssh_public_key: str,
+    depends_on: list = []
+  ):
 
     def transform_manifest(obj, opts):
         sg_selector={
@@ -45,7 +52,7 @@ def karpenter_templates(name: str, provider: Provider, manifests_path: str, eks_
     for file in files:
       config_files.append(
         ConfigFile(
-          name=path.basename(file),
+          name=f"{name}-{path.basename(file)}",
           file=file,
           transformations=[transform_manifest],
           opts=resource_options

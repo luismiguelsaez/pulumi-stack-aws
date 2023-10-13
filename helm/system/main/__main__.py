@@ -2,9 +2,10 @@ from pulumi import ResourceOptions
 from pulumi_kubernetes import Provider
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
 from resources import iam
-from stack import aws_config, charts_config, eks
+from stack import aws_config, charts_config, eks, cluster_tags, discovery_tags
 from tools import karpenter
 from requests import get
+from pulumi_aws.ecr import get_authorization_token
 
 """
 Create Kubernetes provider from EKS kubeconfig
@@ -17,7 +18,7 @@ k8s_provider = Provider(
 karpenter_helm_release = Release(
     "karpenter-helm-release",
     repository_opts=RepositoryOptsArgs(
-        repo="https://charts.karpenter.sh"
+        repo="https://charts.karpenter.sh",
     ),
     version=charts_config.require("karpenter_version"),
     chart="karpenter",
@@ -82,8 +83,10 @@ public_ssh_key = get("https://github.com/luismiguelsaez.keys").text.strip()
 karpenter.karpenter_templates(
     name="karpenter-aws-node-templates",
     provider=k8s_provider,
-    manifests_path="resources/",
+    manifests_path="resources/nodetemplates",
     eks_cluster_name=eks.get_output("eks_cluster_name"),
     ssh_public_key=public_ssh_key,
+    sg_selector_tags=cluster_tags,
+    subnet_selector_tags=discovery_tags,
     depends_on=[karpenter_helm_release]
 )

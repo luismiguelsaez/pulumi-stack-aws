@@ -1,4 +1,4 @@
-from pulumi import ResourceOptions
+from pulumi import ResourceOptions, InvokeOptions
 from pulumi_aws import eks
 from pulumi_aws.iam import OpenIdConnectProvider
 import json
@@ -19,6 +19,7 @@ eks_cluster = eks.Cluster(
         endpoint_public_access=True,
         public_access_cidrs=["0.0.0.0/0"],
         subnet_ids=network.get_output("subnets_private"),
+        #cluster_security_group_id=ec2.eks_cluster_security_group.id,
         security_group_ids=[ec2.eks_cluster_node_security_group.id]
     ),
     tags={
@@ -59,6 +60,9 @@ eks_nodegroup_system = eks.NodeGroup(
     capacity_type="ON_DEMAND",
     ami_type="BOTTLEROCKET_ARM_64",
     disk_size=20,
+    update_config=eks.NodeGroupUpdateConfigArgs(
+        max_unavailable=1,
+    ),
     tags={
         "Name": f"{name_prefix}-system",
     } | common_tags,

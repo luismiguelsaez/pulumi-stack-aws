@@ -15,6 +15,10 @@ common_tags = {
     "pulumi:stack": env,
 }
 
+cluster_tags = {
+    f"kubernetes.io/cluster/{name_prefix}": "owned"
+}
+
 discovery_tags = {
     "karpenter.sh/discovery": name_prefix,
 }

@@ -1,5 +1,5 @@
 from pulumi_aws.ec2 import SecurityGroup, SecurityGroupEgressArgs, SecurityGroupIngressArgs
-from stack import network, common_tags, discovery_tags, name_prefix
+from stack import network, common_tags, cluster_tags, discovery_tags, name_prefix
 
 eks_cluster_node_security_group = SecurityGroup(
     f"eks-{name_prefix}-cluster-node-security-group",
@@ -28,3 +28,38 @@ eks_cluster_node_security_group = SecurityGroup(
         "Name": f"eks-{name_prefix}-cluster-node-security-group",
     } | common_tags | discovery_tags,
 )
+
+#eks_cluster_security_group = SecurityGroup(
+#    f"eks-{name_prefix}-cluster-security-group",
+#    name="eks-cluster-security-group",
+#    description="Security group for EKS cluster",
+#    vpc_id=network.get_output("vpc_id"),
+#    egress=[
+#        SecurityGroupEgressArgs(
+#            description="Allow all outbound traffic by default",
+#            protocol="-1",
+#            from_port=0,
+#            to_port=0,
+#            cidr_blocks=["0.0.0.0/0"],
+#        )
+#    ],
+#    ingress=[
+#        SecurityGroupIngressArgs(
+#            description="Allow all inbound traffic from self",
+#            protocol="-1",
+#            from_port=0,
+#            to_port=0,
+#            self=True,
+#        ),
+#        SecurityGroupIngressArgs(
+#            description="Allow all inbound traffic from nodes",
+#            protocol="-1",
+#            from_port=0,
+#            to_port=0,
+#            security_groups=[eks_cluster_node_security_group.id],
+#        )
+#    ],
+#    tags={
+#        "Name": f"eks-{name_prefix}-cluster-security-group"
+#    } | cluster_tags | common_tags | discovery_tags,
+#)

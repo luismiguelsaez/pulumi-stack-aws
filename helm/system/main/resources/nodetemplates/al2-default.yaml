@@ -1,9 +1,6 @@
 apiVersion: karpenter.k8s.aws/v1alpha1
 kind: AWSNodeTemplate
 metadata:
-  annotations: {}
-  finalizers: []
-  labels: {}
   name: al2-default
 spec:
   amiFamily: AL2

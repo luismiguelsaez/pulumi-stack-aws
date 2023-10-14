@@ -1,4 +1,5 @@
 from pulumi import StackReference, get_stack, get_project, Config
+from pulumi_kubernetes import Provider
 
 aws_config = Config("aws")
 helm_config = Config("helm")
@@ -27,3 +28,14 @@ discovery_tags = {
 Stack references
 """
 eks = StackReference(f"{org}/eks-{name_prefix}/{env}")
+
+"""
+Kubernetes provider
+"""
+"""
+Create Kubernetes provider from EKS kubeconfig
+"""
+k8s_provider = Provider(
+    resource_name="k8s",
+    kubeconfig=eks.get_output("eks_kubeconfig"),
+)

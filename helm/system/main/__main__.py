@@ -1,20 +1,63 @@
-from pulumi import ResourceOptions
-from pulumi_kubernetes import Provider
+from pulumi import ResourceOptions, export, Output
+from pulumi_kubernetes.core.v1 import ConfigMap, ConfigMapPatch
+from pulumi_kubernetes.meta.v1 import ObjectMetaPatchArgs
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
 from resources import iam
-from stack import aws_config, charts_config, eks, cluster_tags, discovery_tags
+from stack import aws_config, charts_config, eks, cluster_tags, discovery_tags, k8s_provider
 from tools import karpenter
 from requests import get
-from pulumi_aws.ecr import get_authorization_token
 
 """
-Create Kubernetes provider from EKS kubeconfig
+Setup aws-auth ConfigMap for Karpenter
 """
-k8s_provider = Provider(
-    resource_name="k8s",
-    kubeconfig=eks.get_output("eks_kubeconfig"),
+aws_auth_cm = ConfigMap.get(
+    "aws-auth",
+    id="kube-system/aws-auth",
+    opts=ResourceOptions(provider=k8s_provider)
 )
 
+if not aws_auth_cm.metadata.annotations["karpenter.sh/config"]:
+
+    karpenter_role_mapping = iam.karpenter_node_role.arn.apply(lambda arn: f"""
+- rolearn: {arn}
+  username: system:node:{{{{EC2PrivateDNSName}}}}
+  groups:
+  - system:bootstrappers
+  - system:nodes
+""")
+
+else:
+
+    karpenter_role_mapping = ""
+
+existing_map_roles = aws_auth_cm.data['mapRoles']
+
+new_map_roles = Output.concat(
+    existing_map_roles,
+    karpenter_role_mapping
+)
+
+ConfigMapPatch(
+    "karpenter-aws-auth-cm-patch",
+    api_version=aws_auth_cm.api_version,
+    kind=aws_auth_cm.kind,
+    metadata=ObjectMetaPatchArgs(
+        name="aws-auth",
+        namespace="kube-system",
+        annotations={
+            "pulumi.com/patchForce": "true",
+            "karpenter.sh/config": "true"
+        }
+    ),
+    data={
+        "mapRoles": new_map_roles
+    },
+    opts=ResourceOptions(provider=k8s_provider)
+)
+
+"""
+Deploy Karpenter Helm chart
+"""
 karpenter_helm_release = Release(
     "karpenter-helm-release",
     repository_opts=RepositoryOptsArgs(
@@ -44,6 +87,9 @@ karpenter_helm_release = Release(
     opts=ResourceOptions(provider=k8s_provider)
 )
 
+"""
+Deploy Cluster Autoscaler Helm chart
+"""
 cluster_autoscaler_helm_release = Release(
     "cluster-autoscaler-helm-release",
     repository_opts=RepositoryOptsArgs(

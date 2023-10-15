@@ -33,8 +33,11 @@ new_roles_obj = Output.all(
                 "system:nodes"
             ]
         }
-    ] if len(args[0]) < 2 else args[0]
+    ] if len(list(filter(lambda o: o["rolearn"] == args[1], args[0]))) < 1 else args[0]
 )
+
+export("roles_obj", roles_obj)
+export("new_roles_obj", new_roles_obj)
 
 ConfigMapPatch(
     "karpenter-aws-auth-cm-patch",
@@ -45,7 +48,6 @@ ConfigMapPatch(
         namespace="kube-system",
         annotations={
             "pulumi.com/patchForce": "true",
-            "karpenter.sh/config": "true"
         }
     ),
     data={

@@ -1,4 +1,4 @@
-from pulumi import Output, ResourceOptions
+from pulumi import Output, ResourceOptions, export
 from pulumi_kubernetes.core.v1 import ConfigMap, ConfigMapPatch
 from pulumi_kubernetes.meta.v1 import ObjectMetaPatchArgs
 from stack import k8s_provider
@@ -7,6 +7,7 @@ from resources.helm import karpenter_helm_release
 from requests import get
 from tools import karpenter
 from stack import eks, cluster_tags, discovery_tags, k8s_provider
+import yaml
 
 """
 Setup aws-auth ConfigMap for Karpenter
@@ -17,25 +18,22 @@ aws_auth_cm = ConfigMap.get(
     opts=ResourceOptions(provider=k8s_provider)
 )
 
-if not aws_auth_cm.metadata.annotations["karpenter.sh/config"]:
+roles_obj = aws_auth_cm.data['mapRoles'].apply(lambda roles: yaml.load(roles, Loader=yaml.Loader))
 
-    karpenter_role_mapping = iam.karpenter_node_role.arn.apply(lambda arn: f"""
-- rolearn: {arn}
-  username: system:node:{{{{EC2PrivateDNSName}}}}
-  groups:
-  - system:bootstrappers
-  - system:nodes
-""")
-
-else:
-
-    karpenter_role_mapping = ""
-
-existing_map_roles = aws_auth_cm.data['mapRoles']
-
-new_map_roles = Output.concat(
-    existing_map_roles,
-    karpenter_role_mapping
+new_roles_obj = Output.all(
+    roles_obj,
+    iam.karpenter_node_role.arn
+).apply(lambda args:
+    args[0] + [
+        {
+            "rolearn": args[1],
+            "username": f"system:node:{{{{EC2PrivateDNSName}}}}",
+            "groups": [
+                "system:bootstrappers",
+                "system:nodes"
+            ]
+        }
+    ] if len(args[0]) < 2 else args[0]
 )
 
 ConfigMapPatch(
@@ -51,7 +49,7 @@ ConfigMapPatch(
         }
     ),
     data={
-        "mapRoles": new_map_roles
+        "mapRoles": new_roles_obj.apply(lambda roles: yaml.dump(roles, default_flow_style=False))
     },
     opts=ResourceOptions(provider=k8s_provider)
 )

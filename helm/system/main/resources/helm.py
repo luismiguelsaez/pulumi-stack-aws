@@ -14,7 +14,8 @@ karpenter_helm_release = Release(
     ),
     version=charts_config.require("karpenter_version"),
     chart="karpenter",
-    namespace="kube-system",
+    namespace=charts_config.require("karpenter_namespace"),
+    create_namespace=True,
     name="karpenter",
     values={
         "controller": {
@@ -46,7 +47,8 @@ cluster_autoscaler_helm_release = Release(
     ),
     version=charts_config.require("cluster_autoscaler_version"),
     chart="cluster-autoscaler",
-    namespace="kube-system",
+    namespace=charts_config.require("cluster_autoscaler_namespace"),
+    create_namespace=True,
     name="cluster-autoscaler",
     values={
         "autoDiscovery": {
@@ -66,6 +68,111 @@ cluster_autoscaler_helm_release = Release(
             "balance-similar-node-groups": True,
             "skip-nodes-with-system-pods": False,
         },
+    },
+    opts=ResourceOptions(provider=k8s_provider)
+)
+
+"""
+Deploy AWS Load Balancer Controller Helm chart
+"""
+aws_load_balancer_controller_release = Release(
+    "aws-load-balancer-controller-helm-release",
+    repository_opts=RepositoryOptsArgs(
+        repo="https://aws.github.io/eks-charts",
+    ),
+    version=charts_config.require("aws_load_balancer_controller_version"),
+    chart="aws-load-balancer-controller",
+    namespace=charts_config.require("aws_load_balancer_controller_namespace"),
+    create_namespace=True,
+    name="aws-load-balancer-controller",
+    values={
+        "clusterName": eks.get_output("eks_cluster_name"),
+        "region": aws_config.require("region"),
+        "serviceAccount": {
+            "create": True,
+            "annotations": {
+                "eks.amazonaws.com/role-arn": iam.aws_load_balancer_controller_role.arn,
+            }
+        },
+    },
+    opts=ResourceOptions(provider=k8s_provider)
+)
+
+"""
+Deploy AWS EBS CSI Driver Helm chart
+"""
+ebs_csi_driver_release = Release(
+    "ebs-csi-driver-helm-release",
+    repository_opts=RepositoryOptsArgs(
+        repo="https://kubernetes-sigs.github.io/aws-ebs-csi-driver",
+    ),
+    version=charts_config.require("ebs_csi_driver_version"),
+    chart="aws-ebs-csi-driver",
+    namespace=charts_config.require("ebs_csi_driver_namespace"),
+    create_namespace=True,
+    name="aws-ebs-csi-driver",
+    values={
+        "storageClasses": [
+            {
+                "name": "ebs",
+                "annotations": {
+                    "storageclass.kubernetes.io/is-default-class": "true",
+                },
+                "labels": {},
+                "volumeBindingMode": "WaitForFirstConsumer",
+                "reclaimPolicy": "Retain",
+                "allowVolumeExpansion": True,
+                "parameters": {
+                    "encrypted": "true",
+                },
+            }
+        ],
+        "controller": {
+            "serviceAccount": {
+                "create": True,
+                "annotations": {
+                    "eks.amazonaws.com/role-arn": iam.ebs_csi_driver_role.arn,
+                },
+            }
+        },
+        "node": {
+            "serviceAccount": {
+                "create": True,
+                "annotations": {
+                    "eks.amazonaws.com/role-arn": iam.ebs_csi_driver_role.arn,
+                },
+            }
+        },
+    },
+    opts=ResourceOptions(provider=k8s_provider)
+)
+
+"""
+Deploy AWS EBS CSI Driver Helm chart
+"""
+external_dns_release = Release(
+    "external-dns-helm-release",
+    repository_opts=RepositoryOptsArgs(
+        repo="https://kubernetes-sigs.github.io/external-dns",
+    ),
+    version=charts_config.require("external_dns_version"),
+    chart="external-dns",
+    namespace=charts_config.require("external_dns_namespace"),
+    name="external-dns",
+    create_namespace=True,
+    values={
+        "provider": "aws",
+        "sources": ["service", "ingress"],
+        "policy": "sync",
+        "deploymentStrategy": {
+            "type": "Recreate",
+        },
+        "serviceAccount": {
+            "create": True,
+            "annotations": {
+                "eks.amazonaws.com/role-arn": iam.external_dns_role.arn,
+            },
+        }
     },
     opts=ResourceOptions(provider=k8s_provider)
 )

@@ -12,5 +12,16 @@ config:
 
   helm:name_prefix: main
 
+  # Helm charts versions
   charts:karpenter_version: "0.16.3"
   charts:cluster_autoscaler_version: "9.29.3"
+  charts:aws_load_balancer_controller_version: "1.6.1"
+  charts:ebs_csi_driver_version: "2.23.1"
+  charts:external_dns_version: "1.13.1"
+
+  # Helm charts namespaces
+  charts:karpenter_namespace: "cloud-controllers"
+  charts:cluster_autoscaler_namespace: "cloud-controllers"
+  charts:aws_load_balancer_controller_namespace: "cloud-controllers"
+  charts:ebs_csi_driver_namespace: "cloud-controllers"
+  charts:external_dns_namespace: "cloud-controllers"

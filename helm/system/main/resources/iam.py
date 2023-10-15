@@ -2,11 +2,11 @@ from pulumi_aws.iam import Role, Policy, RolePolicyAttachment, InstanceProfile
 from pulumi import Output
 import json
 from stack import eks, common_tags, name_prefix
-from tools.iam import create_policy_from_file, create_role_oidc
+from tools.iam import create_policy_from_file, create_role_oidc, create_role_with_attached_policy
 from os import path
 
 """
-Create IAM roles
+Create Karpenter IAM roles
 """
 karpenter_node_role = Role(
     f"helm-{name_prefix}-karpenter-node",
@@ -155,71 +155,42 @@ RolePolicyAttachment(
     policy_arn=karpenter_policy.arn
 )
 
-cluster_autoscaler_policy = Policy(
-    f"helm-{name_prefix}-cluster-autoscaller-controller",
-    name="cluster-autoscaler-policy",
-    policy=Output.json_dumps(
-        {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Sid": "ClusterAutoscaler",
-                    "Effect": "Allow",
-                    "Action": [
-                        "autoscaling:DescribeAutoScalingGroups",
-                        "autoscaling:DescribeAutoScalingInstances",
-                        "autoscaling:DescribeLaunchConfigurations",
-                        "autoscaling:DescribeTags",
-                        "ec2:DescribeInstanceTypes",
-                        "ec2:DescribeLaunchTemplateVersions",
-                        "autoscaling:SetDesiredCapacity",
-                        "autoscaling:TerminateInstanceInAutoScalingGroup",
-                        "ec2:DescribeInstanceTypes",
-                        "eks:DescribeNodegroup"
-                    ],
-                    "Resource": "*"
-                }
-            ]
-        }
-    ),
+"""
+Create cloud controllers roles with OIDC/WebIdentity
+"""
+
+cluster_autoscaler_role = create_role_with_attached_policy(
+    f"helm-{name_prefix}-cluster-autoscaler",
+    path.join(path.dirname(__file__), "policies/cluster-autoscaler.json"),
+    eks.get_output("eks_oidc_provider_arn"),
     tags={
         "Name": f"helm-{name_prefix}-cluster-autoscaller-controller",
     } | common_tags
 )
 
-cluster_autoscaler_policy_test = create_policy_from_file("cluster-autoscaler-test", path.join(path.dirname(__file__), "policies/cluster-autoscaler.json"))
-cluster_autoscaler_role_test = create_role_oidc("cluster-autoscaler-test", eks.get_output("eks_oidc_provider_arn"))
-RolePolicyAttachment(
-    "cluster-autoscaler-policy-attachment-test",
-    role=cluster_autoscaler_role_test.name,
-    policy_arn=cluster_autoscaler_policy_test.arn
-)
-
-cluster_autoscaler_role = Role(
-    f"helm-{name_prefix}-cluster-autoscaller-controller",
-    name="cluster-autoscaler-role",
-    assume_role_policy=Output.json_dumps(
-        {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Sid": "",
-                    "Effect": "Allow",
-                    "Principal": {
-                        "Federated": eks.get_output("eks_oidc_provider_arn")
-                    },
-                    "Action": "sts:AssumeRoleWithWebIdentity"
-                }
-            ]
-        }
-    ),
+aws_load_balancer_controller_role = create_role_with_attached_policy(
+    f"helm-{name_prefix}-aws-load-balancer-controller",
+    path.join(path.dirname(__file__), "policies/aws-load-balancer-controller.json"),
+    eks.get_output("eks_oidc_provider_arn"),
     tags={
-        "Name": f"helm-{name_prefix}-cluster-autoscaller-controller",
+        "Name": f"helm-{name_prefix}-aws-load-balancer-controller",
     } | common_tags
 )
 
-RolePolicyAttachment(
-    "cluster-autoscaler-policy-attachment",
-    role=cluster_autoscaler_role.name,
-    policy_arn=cluster_autoscaler_policy.arn
+ebs_csi_driver_role = create_role_with_attached_policy(
+    f"helm-{name_prefix}-ebs-csi-driver",
+    path.join(path.dirname(__file__), "policies/ebs-csi-driver.json"),
+    eks.get_output("eks_oidc_provider_arn"),
+    tags={
+        "Name": f"helm-{name_prefix}-ebs-csi-driver",
+    } | common_tags
+)
+
+external_dns_role = create_role_with_attached_policy(
+    f"helm-{name_prefix}-external-dns",
+    path.join(path.dirname(__file__), "policies/external-dns.json"),
+    eks.get_output("eks_oidc_provider_arn"),
+    tags={
+        "Name": f"helm-{name_prefix}-external-dns",
+    } | common_tags
 )

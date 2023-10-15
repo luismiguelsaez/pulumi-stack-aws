@@ -1,4 +1,4 @@
-from pulumi import Output, ResourceOptions, export
+from pulumi import Output, ResourceOptions
 from pulumi_kubernetes.core.v1 import ConfigMap, ConfigMapPatch
 from pulumi_kubernetes.meta.v1 import ObjectMetaPatchArgs
 from stack import k8s_provider
@@ -50,8 +50,7 @@ ConfigMapPatch(
     data={
         "mapRoles": new_roles_obj.apply(lambda roles: yaml.dump(roles, default_flow_style=False))
     },
-    immutable=True,
-    opts=ResourceOptions(provider=k8s_provider)
+    opts=ResourceOptions(provider=k8s_provider, retain_on_delete=True)
 )
 
 """

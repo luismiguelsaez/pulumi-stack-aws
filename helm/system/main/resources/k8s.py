@@ -36,9 +36,6 @@ new_roles_obj = Output.all(
     ] if len(list(filter(lambda o: o["rolearn"] == args[1], args[0]))) < 1 else args[0]
 )
 
-export("roles_obj", roles_obj)
-export("new_roles_obj", new_roles_obj)
-
 ConfigMapPatch(
     "karpenter-aws-auth-cm-patch",
     api_version=aws_auth_cm.api_version,

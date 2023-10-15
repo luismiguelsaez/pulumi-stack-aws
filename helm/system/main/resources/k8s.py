@@ -50,6 +50,7 @@ ConfigMapPatch(
     data={
         "mapRoles": new_roles_obj.apply(lambda roles: yaml.dump(roles, default_flow_style=False))
     },
+    immutable=True,
     opts=ResourceOptions(provider=k8s_provider)
 )
 

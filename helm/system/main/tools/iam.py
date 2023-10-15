@@ -17,7 +17,7 @@ def create_policy_from_file(name: str, policy_file: str, tags: dict = {})->Polic
     
     return policy
 
-def create_role_oidc(name, oidc_provider_arn: str, tags: dict = {})->Role:
+def create_role_oidc(name, oidc_provider_arn: Output, tags: dict = {})->Role:
 
     role = Role(
         name,
@@ -29,7 +29,7 @@ def create_role_oidc(name, oidc_provider_arn: str, tags: dict = {})->Role:
                     {
                         "Action": "sts:AssumeRoleWithWebIdentity",
                         "Principal": {
-                            "Federated": oidc_provider_arn
+                            "Federated": oidc_provider_arn.apply(lambda arn: arn)
                         },
                         "Effect": "Allow",
                         "Sid": "",
@@ -42,7 +42,7 @@ def create_role_oidc(name, oidc_provider_arn: str, tags: dict = {})->Role:
 
     return role
 
-def create_role_with_attached_policy(name: str, policy_file: str, oidc_provider_arn: str, tags: dict = {})->Role:
+def create_role_with_attached_policy(name: str, policy_file: str, oidc_provider_arn: Output, tags: dict = {})->Role:
 
     policy = create_policy_from_file(name, policy_file, tags)
     role = create_role_oidc(name, oidc_provider_arn, tags)

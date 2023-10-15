@@ -2,7 +2,8 @@ from pulumi_aws.iam import Role, Policy, RolePolicyAttachment, InstanceProfile
 from pulumi import Output
 import json
 from stack import eks, common_tags, name_prefix
-
+from tools.iam import create_policy_from_file, create_role_oidc
+from os import path
 
 """
 Create IAM roles
@@ -184,6 +185,14 @@ cluster_autoscaler_policy = Policy(
     tags={
         "Name": f"helm-{name_prefix}-cluster-autoscaller-controller",
     } | common_tags
+)
+
+cluster_autoscaler_policy_test = create_policy_from_file("cluster-autoscaler-test", path.join(path.dirname(__file__), "policies/cluster-autoscaler.json"))
+cluster_autoscaler_role_test = create_role_oidc("cluster-autoscaler-test", eks.get_output("eks_oidc_provider_arn"))
+RolePolicyAttachment(
+    "cluster-autoscaler-policy-attachment-test",
+    role=cluster_autoscaler_role_test.name,
+    policy_arn=cluster_autoscaler_policy_test.arn
 )
 
 cluster_autoscaler_role = Role(

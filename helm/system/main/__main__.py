@@ -1,6 +1,7 @@
-from resources import helm, iam, k8s
-from pulumi import export, Output
+from resources import helm, k8s
+from pulumi import export
 import yaml
+from stack import charts_config
 
 """
 Export new `aws-auth` ConfigMap contents
@@ -10,5 +11,7 @@ export("karpenter-aws-auth-cm", k8s.new_roles_obj.apply(lambda roles: yaml.dump(
 """
 Export Helm releases
 """
-export("helm_release_karpenter", helm.karpenter_helm_release.status)
-export("helm_release_cluster_autoscaler",helm.cluster_autoscaler_helm_release.status)
+if charts_config.require_bool("cluster_autoscaler_enabled"):
+    export("helm_release_cluster_autoscaler", helm.cluster_autoscaler_helm_release.status)
+if charts_config.require_bool("karpenter_enabled"):
+    export("helm_release_karpenter", helm.karpenter_helm_release.status)

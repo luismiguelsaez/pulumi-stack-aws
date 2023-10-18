@@ -98,7 +98,11 @@ if charts_config.require_bool("aws_load_balancer_controller_enabled"):
                 }
             },
         },
-        opts=ResourceOptions(provider=k8s_provider, depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release])
+        opts=ResourceOptions(
+            provider=k8s_provider,
+            depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release],
+            ignore_changes=["checksum"]
+        )
     )
 
 """

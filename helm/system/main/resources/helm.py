@@ -1,8 +1,7 @@
 from pulumi import ResourceOptions
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
 from resources import iam
-from stack import aws_config, charts_config, eks, k8s_provider
-from requests import get
+from stack import aws_config, charts_config, network, eks, k8s_provider
 
 """
 Deploy Cluster Autoscaler Helm chart
@@ -91,6 +90,7 @@ if charts_config.require_bool("aws_load_balancer_controller_enabled"):
         values={
             "clusterName": eks.get_output("eks_cluster_name"),
             "region": aws_config.require("region"),
+            "vpcId": network.get_output("vpc_id"),
             "serviceAccount": {
                 "create": True,
                 "annotations": {

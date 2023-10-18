@@ -27,11 +27,9 @@ discovery_tags = {
 """
 Stack references
 """
+network = StackReference(f"{org}/network-{name_prefix}/{env}")
 eks = StackReference(f"{org}/eks-{name_prefix}/{env}")
 
-"""
-Kubernetes provider
-"""
 """
 Create Kubernetes provider from EKS kubeconfig
 """

@@ -2,6 +2,7 @@ from pulumi import ResourceOptions
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
 from resources import iam
 from stack import aws_config, charts_config, network, eks, k8s_provider
+from python_pulumi_helm import releases
 
 """
 Deploy Cluster Autoscaler Helm chart
@@ -185,3 +186,24 @@ if charts_config.require_bool("external_dns_enabled"):
         },
         opts=ResourceOptions(provider=k8s_provider, depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release])
     )
+
+"""
+Deploy Ingress Nginx controller
+"""
+
+helm_ingress_nginx_external_chart = releases.ingress_nginx(
+    provider=k8s_provider,
+    name="ingress-nginx-internet-facing",
+    name_suffix="external",
+    public=True,
+    ssl_enabled=True,
+    acm_cert_arns=[ingress_acm_cert_arn],
+    alb_resource_tags={ "eks-cluster-name": eks_name_prefix, "ingress-name": "ingress-nginx-internet-facing" },
+    metrics_enabled=helm_config.require_bool("prometheus_stack"),
+    global_rate_limit_enabled=True,
+    karpenter_node_enabled=helm_config.require_bool("karpenter"),
+    namespace=k8s_namespace_ingress.metadata.name,
+    depends_on=[eks_cluster, helm_aws_load_balancer_controller_chart, helm_external_dns_chart]
+                + require_default_node_group
+                + karpenter_chart_deps,
+)

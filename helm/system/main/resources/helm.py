@@ -1,7 +1,7 @@
 from pulumi import ResourceOptions
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
 from resources import iam
-from stack import aws_config, charts_config, network, eks, k8s_provider
+from stack import aws_config, charts_config, network, eks, k8s_provider, name_prefix
 from python_pulumi_helm import releases
 
 """
@@ -197,13 +197,11 @@ helm_ingress_nginx_external_chart = releases.ingress_nginx(
     name_suffix="external",
     public=True,
     ssl_enabled=True,
-    acm_cert_arns=[ingress_acm_cert_arn],
-    alb_resource_tags={ "eks-cluster-name": eks_name_prefix, "ingress-name": "ingress-nginx-internet-facing" },
-    metrics_enabled=helm_config.require_bool("prometheus_stack"),
-    global_rate_limit_enabled=True,
-    karpenter_node_enabled=helm_config.require_bool("karpenter"),
-    namespace=k8s_namespace_ingress.metadata.name,
-    depends_on=[eks_cluster, helm_aws_load_balancer_controller_chart, helm_external_dns_chart]
-                + require_default_node_group
-                + karpenter_chart_deps,
+    acm_cert_arns=["arn:aws:acm:eu-central-1:484308071187:certificate/aca221b6-0f15-4d58-b1f3-fd27fc14c67a"],
+    alb_resource_tags={ "eks-cluster-name": name_prefix, "ingress-name": "ingress-nginx-internet-facing" },
+    metrics_enabled=False,
+    global_rate_limit_enabled=False,
+    karpenter_node_enabled=True,
+    namespace="kube-system",
+    depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release]
 )

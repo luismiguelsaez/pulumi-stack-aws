@@ -201,7 +201,7 @@ helm_ingress_nginx_external_chart = releases.ingress_nginx(
     alb_resource_tags={ "eks-cluster-name": name_prefix, "ingress-name": "ingress-nginx-internet-facing" },
     metrics_enabled=False,
     global_rate_limit_enabled=False,
-    karpenter_node_enabled=True,
-    namespace="kube-system",
+    karpenter_node_enabled=False,
+    namespace="ingress",
     depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release]
 )

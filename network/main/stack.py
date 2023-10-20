@@ -17,6 +17,12 @@ common_tags = {
     "pulumi:stack": env,
 }
 
-discovery_tags = {
+discovery_tags_public = {
     "karpenter.sh/discovery": name_prefix,
+    "kubernetes.io/role/internal-elb": 1
+}
+
+discovery_tags_private = {
+    "karpenter.sh/discovery": name_prefix,
+    "kubernetes.io/role/elb": 1
 }

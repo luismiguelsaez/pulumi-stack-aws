@@ -1,7 +1,7 @@
 from os import name
 from pulumi_aws import ec2, get_availability_zones
 import ipaddress
-from stack import network_config, common_tags, discovery_tags, vpc_cidr, subnet_mask, name_prefix
+from stack import network_config, common_tags, discovery_tags_public, discovery_tags_private, vpc_cidr, subnet_mask, name_prefix
 
 """
 Create VPC
@@ -38,7 +38,7 @@ for i in range(network_config.require_int("azs") * 2):
                 availability_zone=az,
                 cidr_block=str(list(ipaddress.IPv4Network(vpc_cidr).subnets(new_prefix=subnet_mask))[i]),
                 map_public_ip_on_launch=False,
-                tags=tags | common_tags,
+                tags=tags | common_tags | discovery_tags_public,
                 vpc_id=vpc.id,
             )
         )
@@ -51,7 +51,7 @@ for i in range(network_config.require_int("azs") * 2):
                 availability_zone=az,
                 cidr_block=str(list(ipaddress.IPv4Network(vpc_cidr).subnets(new_prefix=subnet_mask))[i]),
                 map_public_ip_on_launch=False,
-                tags=tags | common_tags | discovery_tags,
+                tags=tags | common_tags | discovery_tags_private,
                 vpc_id=vpc.id,
             )
         )

@@ -18,7 +18,6 @@ common_tags = {
 }
 
 discovery_tags_public = {
-    "karpenter.sh/discovery": name_prefix,
     "kubernetes.io/role/elb": "1",
 }
 

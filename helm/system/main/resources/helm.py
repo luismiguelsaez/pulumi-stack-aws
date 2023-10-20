@@ -190,7 +190,6 @@ if charts_config.require_bool("external_dns_enabled"):
 """
 Deploy Ingress Nginx controller
 """
-
 helm_ingress_nginx_external_chart = releases.ingress_nginx(
     provider=k8s_provider,
     name="ingress-nginx-internet-facing",
@@ -204,4 +203,19 @@ helm_ingress_nginx_external_chart = releases.ingress_nginx(
     karpenter_node_enabled=False,
     namespace="ingress",
     depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release]
+)
+
+helm_opensearch_chart =  releases.opensearch(
+    ingress_domain="dev.lokalise.cloud",
+    ingress_class_name="nginx-external",
+    storage_class_name="ebs",
+    storage_size="20Gi",
+    replicas=3,
+    karpenter_node_enabled=True,
+    karpenter_node_provider_name="al2-default",
+    resources_requests_memory_mb="2000",
+    resources_requests_cpu="1000m",
+    provider=k8s_provider,
+    namespace="opensearch",
+    depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release, ebs_csi_driver_release, helm_ingress_nginx_external_chart]
 )

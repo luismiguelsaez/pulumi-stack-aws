@@ -17,7 +17,7 @@ config:
   charts:karpenter_enabled: True
   charts:aws_load_balancer_controller_enabled: True
   charts:external_dns_enabled: True
-  charts:ebs_csi_driver_enabled: False
+  charts:ebs_csi_driver_enabled: True
 
   # Helm charts versions
   charts:karpenter_version: "0.16.3"

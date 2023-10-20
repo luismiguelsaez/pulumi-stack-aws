@@ -1,2 +1,6 @@
 config:
   aws:profile: dev
+
+  eks:node_group_size_max: 10
+  eks:node_group_size_desired: 2
+  eks:node_group_size_min: 2

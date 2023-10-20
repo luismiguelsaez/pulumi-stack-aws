@@ -4,7 +4,7 @@ from pulumi_aws.iam import OpenIdConnectProvider
 import json
 from . import iam, ec2
 from tools import http
-from stack import network, aws_config, common_tags, discovery_tags, name_prefix, eks_version
+from stack import network, aws_config, common_tags, discovery_tags, name_prefix, eks_version, eks_config
 
 """
 Create EKS cluster
@@ -52,9 +52,9 @@ eks_nodegroup_system = eks.NodeGroup(
     node_role_arn=iam.eks_node_role.arn,
     subnet_ids=network.get_output("subnets_private"),
     scaling_config=eks.NodeGroupScalingConfigArgs(
-        desired_size=3,
-        max_size=10,
-        min_size=3
+        max_size=eks_config.require("node_group_size_max"),
+        desired_size=eks_config.require("node_group_size_desired"),
+        min_size=eks_config.require("node_group_size_min"),
     ),
     instance_types=["t4g.medium", "t4g.large"],
     capacity_type="ON_DEMAND",

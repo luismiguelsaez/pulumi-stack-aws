@@ -12,3 +12,6 @@ config:
 
   eks:version: "1.27"
   eks:name_prefix: main
+  eks:node_group_size_max: 10
+  eks:node_group_size_desired: 2
+  eks:node_group_size_min: 2

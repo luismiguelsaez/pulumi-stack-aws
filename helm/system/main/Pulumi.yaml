@@ -18,6 +18,7 @@ config:
   charts:aws_load_balancer_controller_enabled: True
   charts:external_dns_enabled: True
   charts:ebs_csi_driver_enabled: True
+  charts:opensearch_enabled: False
 
   # Helm charts versions
   charts:karpenter_version: "0.16.3"
@@ -32,3 +33,9 @@ config:
   charts:aws_load_balancer_controller_namespace: "cloud-controllers"
   charts:ebs_csi_driver_namespace: "cloud-controllers"
   charts:external_dns_namespace: "cloud-controllers"
+
+  # Opensearch settings
+  opensearch:storage_size: 20Gi
+  opensearch:replicas: 3
+  opensearch:memory_mb: "2000"
+  opensearch:cpu: 1000m

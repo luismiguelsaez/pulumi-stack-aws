@@ -1,7 +1,7 @@
 from pulumi import ResourceOptions
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
 from resources import iam
-from stack import aws_config, charts_config, network, eks, k8s_provider, name_prefix
+from stack import aws_config, charts_config, opensearch_config, network, eks, k8s_provider, name_prefix
 from python_pulumi_helm import releases
 
 """
@@ -205,17 +205,18 @@ helm_ingress_nginx_external_chart = releases.ingress_nginx(
     depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release]
 )
 
-helm_opensearch_chart =  releases.opensearch(
-    ingress_domain="dev.lokalise.cloud",
-    ingress_class_name="nginx-external",
-    storage_class_name="ebs",
-    storage_size="20Gi",
-    replicas=3,
-    karpenter_node_enabled=True,
-    karpenter_node_provider_name="al2-default",
-    resources_requests_memory_mb="2000",
-    resources_requests_cpu="1000m",
-    provider=k8s_provider,
-    namespace="opensearch",
-    depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release, ebs_csi_driver_release, helm_ingress_nginx_external_chart]
-)
+if charts_config.require_bool("opensearch_enabled"):
+    helm_opensearch_chart =  releases.opensearch(
+        ingress_domain="dev.lokalise.cloud",
+        ingress_class_name="nginx-external",
+        storage_class_name="ebs",
+        storage_size=opensearch_config.require("storage_size"),
+        replicas=opensearch_config.require_int("storage_size"),
+        karpenter_node_enabled=True,
+        karpenter_node_provider_name="al2-default",
+        resources_requests_memory_mb=opensearch_config.require("memory_mb"),
+        resources_requests_cpu=opensearch_config.require("cpu"),
+        provider=k8s_provider,
+        namespace="opensearch",
+        depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release, ebs_csi_driver_release, helm_ingress_nginx_external_chart]
+    )

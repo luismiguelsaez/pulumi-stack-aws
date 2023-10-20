@@ -26,6 +26,8 @@ config:
   charts:aws_load_balancer_controller_version: "1.6.1"
   charts:ebs_csi_driver_version: "2.23.1"
   charts:external_dns_version: "1.13.1"
+  charts:opensearch_version: "2.14.1"
+  charts:ingress_nginx_external_version: "4.2.5"
 
   # Helm charts namespaces
   charts:karpenter_namespace: "cloud-controllers"

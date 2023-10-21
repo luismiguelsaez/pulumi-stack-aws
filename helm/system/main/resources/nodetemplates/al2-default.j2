@@ -37,10 +37,4 @@ spec:
     chmod 0600 /home/ec2-user/.ssh/authorized_keys
     chown -R ec2-user.ec2-user /home/ec2-user
 
-    TOTAL_MEM=$(cat /proc/meminfo | grep "MemTotal" | awk '{print $2}')
-    CONNTRACK_MAX=$(( ( $TOTAL_MEM * 1024 ) / 16384 ))
-
-    echo -e "\n# Bump conntrack max\nnet.netfilter.nf_conntrack_max = $CONNTRACK_MAX" >> /etc/sysctl.d/00-defaults.conf
-    sysctl -w net.netfilter.nf_conntrack_max=$CONNTRACK_MAX
-
     --BOUNDARY--

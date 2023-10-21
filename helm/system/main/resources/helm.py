@@ -215,7 +215,7 @@ if charts_config.require_bool("opensearch_enabled"):
         storage_size=opensearch_config.require("storage_size"),
         replicas=opensearch_config.require_int("storage_size"),
         karpenter_node_enabled=True,
-        karpenter_node_provider_name="al2-default",
+        karpenter_node_provider_name="bottlerocket-default",
         resources_requests_memory_mb=opensearch_config.require("memory_mb"),
         resources_requests_cpu=opensearch_config.require("cpu"),
         provider=k8s_provider,

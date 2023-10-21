@@ -199,7 +199,7 @@ if charts_config.require_bool("external_dns_enabled"):
 """
 Deploy Ingress Nginx controller
 """
-if charts_config.require_bool("ingress_nginx_internal_enabled"):
+if charts_config.require_bool("ingress_nginx_external_enabled"):
     helm_ingress_nginx_external_chart = releases.ingress_nginx(
         version=charts_config.require("ingress_nginx_external_version"),
         name="ingress-nginx-internet-facing",

@@ -217,7 +217,7 @@ if charts_config.require_bool("ingress_nginx_external_enabled"):
     )
 
 if charts_config.require_bool("opensearch_enabled"):
-    helm_opensearch_chart =  releases.opensearch(
+    helm_opensearch_chart = releases.opensearch(
         version=charts_config.require("opensearch_version"),
         ingress_domain="dev.lokalise.cloud",
         ingress_class_name="nginx-external",
@@ -231,4 +231,30 @@ if charts_config.require_bool("opensearch_enabled"):
         provider=k8s_provider,
         namespace=charts_config.require("opensearch_namespace"),
         depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release, ebs_csi_driver_release, helm_ingress_nginx_external_chart]
+    )
+
+
+if charts_config.require_bool("argocd_enabled"):
+    helm_argocd_chart = releases.argocd(
+        version=charts_config.require("argocd_version"),
+        provider=k8s_provider,
+        namespace=charts_config.require("argocd_namespace"),
+        depends_on=[karpenter_helm_release, ebs_csi_driver_release, helm_ingress_nginx_external_chart],
+        ingress_hostname=f"argocd.dev.lokalise.cloud",
+        ingress_protocol="https",
+        ingress_class_name="nginx-external",
+        argocd_redis_ha_enabled=True,
+        argocd_redis_ha_haproxy_enabled=True,
+        argocd_application_controller_replicas=3,
+        argocd_applicationset_controller_replicas=3,
+        karpenter_node_enabled=True,
+        karpenter_node_provider_name="bottlerocket-default",
+        karpenter_provisioner_controller_instance_category=["t"],
+        karpenter_provisioner_controller_instance_arch=["amd64"],
+        karpenter_provisioner_controller_instance_capacity_type=["spot"],
+        karpenter_provisioner_redis_instance_category=["t"],
+        karpenter_provisioner_redis_instance_arch=["arm64"],
+        karpenter_provisioner_redis_instance_capacity_type=["spot"],
+        controller_resources={},
+        repo_server_resources={},
     )

@@ -27,9 +27,13 @@ spec:
     httpPutResponseHopLimit: 2
     httpTokens: required
   securityGroupSelector:
-    karpenter.sh/discovery: {{ sg_selector_tags }}
+      {% for key, value in sg_selector_tags.items() %}
+      {{ key }}: {{ value }}
+      {% endfor %}
   subnetSelector:
-    karpenter.sh/discovery: {{ subnet_selector_tags }}
+      {% for key, value in subnet_selector_tags.items() %}
+      {{ key }}: {{ value }}
+      {% endfor %}
   userData: |-
     [settings.kubernetes.eviction-hard]
     "memory.available" = "12%"

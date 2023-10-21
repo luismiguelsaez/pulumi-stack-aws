@@ -65,7 +65,6 @@ if charts_config.require_bool("karpenter_enabled"):
         name="karpenter-aws-node-templates",
         provider=k8s_provider,
         manifests_path="resources/nodetemplates",
-        eks_cluster_name=eks.get_output("eks_cluster_name"),
         ssh_public_key=public_ssh_key,
         sg_selector_tags=cluster_tags,
         subnet_selector_tags=discovery_tags,

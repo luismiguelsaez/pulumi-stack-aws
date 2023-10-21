@@ -19,6 +19,7 @@ config:
   charts:aws_load_balancer_controller_enabled: True
   charts:external_dns_enabled: True
   charts:ebs_csi_driver_enabled: True
+  charts:ingress_nginx_external_enabled: True
   charts:opensearch_enabled: False
 
   # Helm charts versions

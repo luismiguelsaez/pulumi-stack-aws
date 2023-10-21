@@ -199,21 +199,22 @@ if charts_config.require_bool("external_dns_enabled"):
 """
 Deploy Ingress Nginx controller
 """
-helm_ingress_nginx_external_chart = releases.ingress_nginx(
-    version=charts_config.require("ingress_nginx_external_version"),
-    name="ingress-nginx-internet-facing",
-    name_suffix="external",
-    public=True,
-    ssl_enabled=True,
-    acm_cert_arns=["arn:aws:acm:eu-central-1:484308071187:certificate/aca221b6-0f15-4d58-b1f3-fd27fc14c67a"],
-    alb_resource_tags={ "eks-cluster-name": name_prefix, "ingress-name": "ingress-nginx-internet-facing" },
-    metrics_enabled=False,
-    global_rate_limit_enabled=False,
-    karpenter_node_enabled=False,
-    provider=k8s_provider,
-    namespace=charts_config.require("ingress_nginx_external_namespace"),
-    depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release]
-)
+if charts_config.require_bool("ingress_nginx_internal_enabled"):
+    helm_ingress_nginx_external_chart = releases.ingress_nginx(
+        version=charts_config.require("ingress_nginx_external_version"),
+        name="ingress-nginx-internet-facing",
+        name_suffix="external",
+        public=True,
+        ssl_enabled=True,
+        acm_cert_arns=["arn:aws:acm:eu-central-1:484308071187:certificate/aca221b6-0f15-4d58-b1f3-fd27fc14c67a"],
+        alb_resource_tags={ "eks-cluster-name": name_prefix, "ingress-name": "ingress-nginx-internet-facing" },
+        metrics_enabled=False,
+        global_rate_limit_enabled=False,
+        karpenter_node_enabled=False,
+        provider=k8s_provider,
+        namespace=charts_config.require("ingress_nginx_external_namespace"),
+        depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release]
+    )
 
 if charts_config.require_bool("opensearch_enabled"):
     helm_opensearch_chart =  releases.opensearch(

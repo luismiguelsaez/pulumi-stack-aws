@@ -50,3 +50,10 @@ config:
   opensearch:replicas: 3
   opensearch:memory_mb: "2000"
   opensearch:cpu: 1000m
+
+  # ArgoCD settings
+  argocd:ingress_hostname: "argocd.dev.lokalise.cloud"
+  argocd:controller_replicas: 3
+  argocd:applicationset_replicas: 3
+  argocd:controller_resources: '{"limits": {"cpu": "1000m", "memory": "2000Mi"}, "requests": {"cpu": "1000m", "memory": "2000Mi"}}'
+  argocd:repo_server_resources: '{"limits": {"cpu": "1000m", "memory": "512Mi"}, "requests": {"cpu": "1000m", "memory": "512Mi"}}'

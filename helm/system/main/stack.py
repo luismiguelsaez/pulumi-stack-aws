@@ -5,6 +5,7 @@ aws_config = Config("aws")
 helm_config = Config("helm")
 charts_config = Config("charts")
 opensearch_config = Config("opensearch")
+argocd_config = Config("argocd")
 
 org = Config().require("org")
 project = get_project()

@@ -41,6 +41,15 @@ if charts_config.require_bool("cluster_autoscaler_enabled"):
     )
 
 """
+Deploy Metrics Server Helm chart
+"""
+if charts_config.require_bool("metrics_server_enabled"):
+    helm_metrics_server_chart = releases.metrics_server(
+        provider=k8s_provider,
+        depends_on=[]
+    )
+
+"""
 Deploy Karpenter Helm chart
 """
 if charts_config.require_bool("karpenter_enabled"):
@@ -202,7 +211,7 @@ helm_ingress_nginx_external_chart = releases.ingress_nginx(
     global_rate_limit_enabled=False,
     karpenter_node_enabled=False,
     provider=k8s_provider,
-    namespace="ingress",
+    namespace=charts_config.require("ingress_nginx_external_namespace"),
     depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release]
 )
 
@@ -219,6 +228,6 @@ if charts_config.require_bool("opensearch_enabled"):
         resources_requests_memory_mb=opensearch_config.require("memory_mb"),
         resources_requests_cpu=opensearch_config.require("cpu"),
         provider=k8s_provider,
-        namespace="opensearch",
+        namespace=charts_config.require("opensearch_namespace"),
         depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release, ebs_csi_driver_release, helm_ingress_nginx_external_chart]
     )

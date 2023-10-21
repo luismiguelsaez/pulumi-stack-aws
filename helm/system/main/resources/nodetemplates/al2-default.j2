@@ -16,9 +16,9 @@ spec:
     httpPutResponseHopLimit: 2
     httpTokens: required
   securityGroupSelector:
-    karpenter.sh/discovery: {'kubernetes.io/cluster/main': 'owned'}
+    karpenter.sh/discovery: {{ sg_selector_tags }}
   subnetSelector:
-    karpenter.sh/discovery: {'karpenter.sh/discovery': 'main'}
+    karpenter.sh/discovery: {{ subnet_selector_tags }}
   userData: |
     MIME-Version: 1.0
     Content-Type: multipart/mixed; boundary="BOUNDARY"
@@ -27,6 +27,6 @@ spec:
     Content-Type: text/x-shellscript; charset="us-ascii"
 
     [ ! -d /home/ec2-user/.ssh ] && mkdir -p /home/ec2-user/.ssh
-    echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDD5joG5XuIrFlPXTG83iRQPOJoYE6IrXInZRwW4gX3WCIVW60tJoOmnx4bTytXMpKeWtxPuT9STYD/ehu7YimoOfClTkBZURxs2dK4gdBDYcluD7jkA6SgkGeufu8HLqySnD+myiHNfICgz7proOJU6ggMDqd5Z4zHCjei3IwrY8UU/1s6/9ujHJCUhkRWFT1uKJx79UIwNe2f9IWApBXB9ctQNjc0anwVSWdMfKwcv/w7YSGjR5KF1G/IlCCBGUVyLIftBwIBG/ZBF7VoTDIobnaXStOfFHzFKEzQ6o0AuCk+hFU1sAqhIxU7VOcVYsFrnqRSAx6UBZSY0j00MK+n" > /home/ec2-user/.ssh/authorized_keys
+    echo "{{ ssh_public_key }}" > /home/ec2-user/.ssh/authorized_keys
 
     --BOUNDARY--

@@ -250,7 +250,7 @@ if charts_config.require_bool("argocd_enabled"):
         karpenter_node_enabled=True,
         karpenter_node_provider_name="bottlerocket-default",
         karpenter_provisioner_controller_instance_category=["t"],
-        karpenter_provisioner_controller_instance_arch=["amd64"],
+        karpenter_provisioner_controller_instance_arch=["arm64"],
         karpenter_provisioner_controller_instance_capacity_type=["spot"],
         karpenter_provisioner_redis_instance_category=["t"],
         karpenter_provisioner_redis_instance_arch=["arm64"],

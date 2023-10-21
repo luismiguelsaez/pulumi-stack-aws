@@ -28,11 +28,11 @@ spec:
     httpTokens: required
   securityGroupSelector:
       {% for key, value in sg_selector_tags.items() %}
-      {{ key }}: {{ value }}
+      {{- key }}: {{ value -}}
       {% endfor %}
   subnetSelector:
       {% for key, value in subnet_selector_tags.items() %}
-      {{ key }}: {{ value }}
+      {{- key }}: {{ value -}}
       {% endfor %}
   userData: |-
     [settings.kubernetes.eviction-hard]

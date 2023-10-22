@@ -237,7 +237,7 @@ if charts_config.require_bool("opensearch_enabled"):
     helm_opensearch_chart = releases.opensearch(
         version=charts_config.require("opensearch_version"),
         ingress_domain="dev.lokalise.cloud",
-        ingress_class_name="nginx-external",
+        ingress_class_name="nginx-internal",
         storage_class_name="ebs",
         storage_size=opensearch_config.require("storage_size"),
         replicas=opensearch_config.require_int("storage_size"),

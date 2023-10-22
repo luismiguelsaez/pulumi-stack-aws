@@ -197,7 +197,7 @@ if charts_config.require_bool("external_dns_enabled"):
     )
 
 """
-Deploy Ingress Nginx controller
+Deploy Ingress Nginx controllers
 """
 if charts_config.require_bool("ingress_nginx_external_enabled"):
     helm_ingress_nginx_external_chart = releases.ingress_nginx(
@@ -213,6 +213,23 @@ if charts_config.require_bool("ingress_nginx_external_enabled"):
         karpenter_node_enabled=False,
         provider=k8s_provider,
         namespace=charts_config.require("ingress_nginx_external_namespace"),
+        depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release]
+    )
+
+if charts_config.require_bool("ingress_nginx_internal_enabled"):
+    helm_ingress_nginx_external_chart = releases.ingress_nginx(
+        version=charts_config.require("ingress_nginx_internal_version"),
+        name="ingress-nginx-internal",
+        name_suffix="internal",
+        public=False,
+        ssl_enabled=False,
+        acm_cert_arns=[],
+        alb_resource_tags={ "eks-cluster-name": name_prefix, "ingress-name": "ingress-nginx-internal" },
+        metrics_enabled=False,
+        global_rate_limit_enabled=False,
+        karpenter_node_enabled=False,
+        provider=k8s_provider,
+        namespace=charts_config.require("ingress_nginx_internal_namespace"),
         depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release]
     )
 

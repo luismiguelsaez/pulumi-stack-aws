@@ -20,8 +20,9 @@ config:
   charts:external_dns_enabled: True
   charts:ebs_csi_driver_enabled: True
   charts:ingress_nginx_external_enabled: True
+  charts:ingress_nginx_internal_enabled: True
   charts:opensearch_enabled: False
-  charts:argocd_enabled: True
+  charts:argocd_enabled: False
 
   # Helm charts versions
   charts:metrics_server_version: "3.11.0"
@@ -32,6 +33,7 @@ config:
   charts:external_dns_version: "1.13.1"
   charts:opensearch_version: "2.14.1"
   charts:ingress_nginx_external_version: "4.2.5"
+  charts:ingress_nginx_internal_version: "4.2.5"
   charts:argocd_version: "5.46.8"
 
   # Helm charts namespaces
@@ -43,6 +45,7 @@ config:
   charts:external_dns_namespace: "cloud-controllers"
   charts:opensearch_namespace: "opensearch"
   charts:ingress_nginx_external_namespace: "ingress"
+  charts:ingress_nginx_internal_namespace: "ingress"
   charts:argocd_namespace: "argocd"
 
   # Opensearch settings

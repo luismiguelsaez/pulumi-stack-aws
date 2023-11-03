@@ -1,0 +1,13 @@
+name: ecs-main
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: ECS cluster
+
+config:
+  org: luismiguelsaez
+
+  aws:region: eu-central-1
+
+  ecs:name_prefix: main

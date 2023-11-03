@@ -49,10 +49,12 @@ ecs_cluster_service_test_task_definition_nginx = ecs.TaskDefinition(
             "cpu": 10,
             "memory": 256,
             "essential": True,
-            "portMappings": [{
-                "containerPort": 80,
-                "hostPort": 80,
-            }],
+            "portMappings": [
+                {
+                    "containerPort": 80,
+                    "hostPort": 80,
+                }
+            ],
         },
     ]),
     tags={

@@ -9,8 +9,16 @@ ami = ec2.get_ami(
     filters=[
         ec2.GetAmiFilterArgs(
             name='name',
-            values=['amzn2-ami-hvm-*-x86_64-ebs'],
+            values=['al2023-ami-2023.*'],
         ),
+        ec2.GetAmiFilterArgs(
+            name='virtualization-type',
+            values=['hvm'],
+        ),
+        ec2.GetAmiFilterArgs(
+            name='architecture',
+            values=['x86_64'],
+        )
     ],
 )
 
@@ -22,15 +30,15 @@ key_pair = ec2.KeyPair(
     public_key=public_ssh_key,
 )
 
-security_group = ec2.SecurityGroup(
-    resource_name=f'{name_prefix}',
+security_group_alb = ec2.SecurityGroup(
+    resource_name=f'{name_prefix}-alb',
     description=f'{name_prefix}',
     vpc_id=network.get_output('vpc_id'),
     ingress=[
         ec2.SecurityGroupIngressArgs(
             protocol='tcp',
-            from_port=22,
-            to_port=22,
+            from_port=80,
+            to_port=80,
             cidr_blocks=['0.0.0.0/0'],
         ),
     ],
@@ -44,6 +52,46 @@ security_group = ec2.SecurityGroup(
     ],
 )
 
+security_group_instances = ec2.SecurityGroup(
+    resource_name=f'{name_prefix}-instances',
+    description=f'{name_prefix}',
+    vpc_id=network.get_output('vpc_id'),
+    ingress=[
+        ec2.SecurityGroupIngressArgs(
+            protocol='tcp',
+            from_port=22,
+            to_port=22,
+            cidr_blocks=['0.0.0.0/0'],
+        ),
+        ec2.SecurityGroupIngressArgs(
+            protocol='tcp',
+            from_port=80,
+            to_port=80,
+            cidr_blocks=['0.0.0.0/0'],
+            security_groups=[security_group_alb.id],
+        ),
+    ],
+    egress=[
+        ec2.SecurityGroupEgressArgs(
+            protocol='-1',
+            from_port=0,
+            to_port=0,
+            cidr_blocks=['0.0.0.0/0'],
+        ),
+    ],
+)
+
+user_data = """
+#!/bin/bash
+dnf update
+dnf install docker -y
+systemctl enable docker
+systemctl start docker
+usermod -aG docker ec2-user
+newgrp docker
+docker run -d -p 80:80 nginx:1.24-alpine
+"""
+
 instances = []
 
 for instance in range(ec2_config.require_int('instance_count')):
@@ -54,8 +102,9 @@ for instance in range(ec2_config.require_int('instance_count')):
             ami=ami.id,
             subnet_id=network.get_output('subnets_public')[instance],
             associate_public_ip_address=True,
-            security_groups=[security_group.id],
+            security_groups=[security_group_instances.id],
             key_name=key_pair.key_name,
+            user_data=user_data,
             tags={
                 'Name': f'{name_prefix}-{instance}',
             },

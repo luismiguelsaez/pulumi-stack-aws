@@ -1,0 +1,15 @@
+name: ec2-main
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: A minimal AWS Python Pulumi program
+
+config:
+  org: luismiguelsaez
+
+  aws:region: eu-central-1
+
+  ec2:name_prefix: main
+  ec2:instance_count: 2
+  ec2:instance_size: t2.micro

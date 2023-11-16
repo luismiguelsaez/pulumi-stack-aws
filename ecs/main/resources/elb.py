@@ -1,5 +1,4 @@
-from email.policy import default
-from stack import network, name_prefix, env
+from stack import network, name_prefix
 from pulumi_aws.alb import LoadBalancer, Listener, TargetGroup, ListenerRule, ListenerRuleActionArgs, ListenerDefaultActionArgs, ListenerDefaultActionFixedResponseArgs, ListenerRuleConditionArgs, ListenerRuleConditionHttpHeaderArgs
 from pulumi_aws.ec2 import SecurityGroup, SecurityGroupEgressArgs, SecurityGroupIngressArgs
 

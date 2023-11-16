@@ -1,0 +1,5 @@
+config:
+  aws:profile: dev
+
+  ec2:instance_count: 2
+  ec2:instance_size: t2.micro

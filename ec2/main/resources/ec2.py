@@ -81,14 +81,13 @@ security_group_instances = ec2.SecurityGroup(
     ],
 )
 
-user_data = """
-#!/bin/bash
+user_data = """#!/bin/bash
 dnf update
 dnf install docker -y
 systemctl enable docker
 systemctl start docker
-usermod -aG docker ec2-user
-newgrp docker
+#usermod -aG docker ec2-user
+#newgrp docker
 docker run -d -p 80:80 nginx:1.24-alpine
 """
 
@@ -100,9 +99,9 @@ for instance in range(ec2_config.require_int('instance_count')):
             f'{name_prefix}-{instance}',
             instance_type=ec2_config.require('instance_size'),
             ami=ami.id,
-            subnet_id=network.get_output('subnets_public')[instance],
-            associate_public_ip_address=True,
-            security_groups=[security_group_instances.id],
+            subnet_id=network.get_output('subnets_private')[instance],
+            associate_public_ip_address=False,
+            vpc_security_group_ids=[security_group_instances.id],
             key_name=key_pair.key_name,
             user_data=user_data,
             tags={

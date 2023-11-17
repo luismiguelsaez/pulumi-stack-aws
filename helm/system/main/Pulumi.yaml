@@ -60,3 +60,5 @@ config:
   argocd:applicationset_replicas: 3
   argocd:controller_resources: '{"limits": {"cpu": "1000m", "memory": "2000Mi"}, "requests": {"cpu": "1000m", "memory": "2000Mi"}}'
   argocd:repo_server_resources: '{"limits": {"cpu": "1000m", "memory": "512Mi"}, "requests": {"cpu": "1000m", "memory": "512Mi"}}'
+
+  ebs_csi_driver:storage_class_name: "ebs"

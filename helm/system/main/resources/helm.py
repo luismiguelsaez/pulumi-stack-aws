@@ -1,7 +1,7 @@
 from pulumi import ResourceOptions
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
 from resources import iam
-from stack import aws_config, charts_config, opensearch_config, argocd_config, network, eks, k8s_provider, name_prefix
+from stack import aws_config, charts_config, ebs_csi_driver_config, opensearch_config, argocd_config, network, eks, k8s_provider, name_prefix
 from python_pulumi_helm import releases
 
 """
@@ -132,7 +132,7 @@ if charts_config.require_bool("ebs_csi_driver_enabled"):
         values={
             "storageClasses": [
                 {
-                    "name": "ebs",
+                    "name": ebs_csi_driver_config.require("storage_class_name"),
                     "annotations": {
                         "storageclass.kubernetes.io/is-default-class": "true",
                     },
@@ -238,7 +238,7 @@ if charts_config.require_bool("opensearch_enabled"):
         version=charts_config.require("opensearch_version"),
         ingress_domain="dev.lokalise.cloud",
         ingress_class_name="nginx-internal",
-        storage_class_name="ebs",
+        storage_class_name=ebs_csi_driver_config.require("storage_class_name"),
         storage_size=opensearch_config.require("storage_size"),
         replicas=opensearch_config.require_int("storage_size"),
         karpenter_node_enabled=True,
@@ -256,11 +256,13 @@ if charts_config.require_bool("argocd_enabled"):
         version=charts_config.require("argocd_version"),
         provider=k8s_provider,
         namespace=charts_config.require("argocd_namespace"),
-        depends_on=[karpenter_helm_release, ebs_csi_driver_release, helm_ingress_nginx_external_chart],
+        depends_on=[karpenter_helm_release, helm_ingress_nginx_external_chart],
         ingress_hostname=argocd_config.require("ingress_hostname"),
-        ingress_protocol="https",
+        ingress_protocol="http",
         ingress_class_name="nginx-external",
-        argocd_redis_ha_enabled=True,
+        argocd_redis_ha_enabled=False,
+        argocd_redis_ha_storage_class=ebs_csi_driver_config.require("storage_class_name"),
+        argocd_redis_ha_storage_size="20Gi",
         argocd_redis_ha_haproxy_enabled=True,
         argocd_application_controller_replicas=argocd_config.require_int("controller_replicas"),
         argocd_applicationset_controller_replicas=argocd_config.require_int("applicationset_replicas"),

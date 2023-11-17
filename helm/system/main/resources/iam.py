@@ -10,7 +10,7 @@ Create Karpenter IAM roles
 """
 karpenter_node_role = Role(
     f"helm-{name_prefix}-karpenter-node",
-    name="karpenter-node-role",
+    name=f"helm-{name_prefix}-karpenter-node",
     assume_role_policy=json.dumps(
         {
             "Version": "2012-10-17",
@@ -33,10 +33,10 @@ karpenter_node_role = Role(
 
 karpenter_node_role_instance_profile = InstanceProfile(
     f"helm-{name_prefix}-karpenter-node",
-    name=f"KarpenterNodeInstanceProfile-{name_prefix}",
+    name=f"helm-{name_prefix}-karpenter-node",
     role=karpenter_node_role.name,
     tags={
-        "Name": f"KarpenterNodeInstanceProfile-{name_prefix}",
+        "Name": f"helm-{name_prefix}-karpenter-node",
     } | common_tags
 )
 
@@ -66,7 +66,7 @@ RolePolicyAttachment(
 
 karpenter_policy = Policy(
     f"helm-{name_prefix}-karpenter-controller",
-    name="karpenter-policy",
+    name=f"helm-{name_prefix}-karpenter-controller",
     policy=Output.json_dumps(
         {
             "Version": "2012-10-17",
@@ -128,7 +128,7 @@ karpenter_policy = Policy(
 
 karpenter_role = Role(
     f"helm-{name_prefix}-karpenter-controller",
-    name="karpenter-role",
+    name=f"helm-{name_prefix}-karpenter-controller",
     assume_role_policy=Output.json_dumps(
         {
             "Version": "2012-10-17",
@@ -192,5 +192,14 @@ external_dns_role = create_role_with_attached_policy(
     eks.get_output("eks_oidc_provider_arn"),
     tags={
         "Name": f"helm-{name_prefix}-external-dns",
+    } | common_tags
+)
+
+argocd_role = create_role_with_attached_policy(
+    f"helm-{name_prefix}-argocd",
+    path.join(path.dirname(__file__), "policies/argocd.json"),
+    eks.get_output("eks_oidc_provider_arn"),
+    tags={
+        "Name": f"helm-{name_prefix}-argocd",
     } | common_tags
 )

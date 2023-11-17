@@ -1,4 +1,4 @@
-from resources import helm, k8s, iam
+from resources import helm, k8s, iam, ssm
 from pulumi import export
 import yaml
 from stack import charts_config
@@ -21,6 +21,7 @@ Export IAM roles
 """
 export("iam_role_karpenter", iam.karpenter_role.arn)
 export("iam_role_cluster_autoscaler", iam.cluster_autoscaler_role.arn)
-export("iam_role_aws_load_balancer_controller_role", iam.aws_load_balancer_controller_role.arn)
-export("iam_role_ebs_csi_driver_role", iam.ebs_csi_driver_role.arn)
-export("iam_role_external_dns_role", iam.external_dns_role.arn)
+export("iam_role_aws_load_balancer_controller", iam.aws_load_balancer_controller_role.arn)
+export("iam_role_ebs_csi_driver", iam.ebs_csi_driver_role.arn)
+export("iam_role_external_dns", iam.external_dns_role.arn)
+export("iam_role_argocd", iam.argocd_role.arn)

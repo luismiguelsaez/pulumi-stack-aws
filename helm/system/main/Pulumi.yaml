@@ -13,14 +13,14 @@ config:
   helm:name_prefix: main
 
   # Helm charts enabled
-  charts:metrics_server_enabled: True
-  charts:cluster_autoscaler_enabled: True
-  charts:karpenter_enabled: True
-  charts:aws_load_balancer_controller_enabled: True
-  charts:external_dns_enabled: True
-  charts:ebs_csi_driver_enabled: True
-  charts:ingress_nginx_external_enabled: True
-  charts:ingress_nginx_internal_enabled: True
+  charts:metrics_server_enabled: False
+  charts:cluster_autoscaler_enabled: False
+  charts:karpenter_enabled: False
+  charts:aws_load_balancer_controller_enabled: False
+  charts:external_dns_enabled: False
+  charts:ebs_csi_driver_enabled: False
+  charts:ingress_nginx_external_enabled: False
+  charts:ingress_nginx_internal_enabled: False
   charts:opensearch_enabled: False
   charts:argocd_enabled: False
 

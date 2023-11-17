@@ -1,4 +1,4 @@
-from resources import helm, k8s
+from resources import helm, k8s, iam
 from pulumi import export
 import yaml
 from stack import charts_config
@@ -15,3 +15,12 @@ if charts_config.require_bool("cluster_autoscaler_enabled"):
     export("helm_release_cluster_autoscaler", helm.cluster_autoscaler_helm_release.status)
 if charts_config.require_bool("karpenter_enabled"):
     export("helm_release_karpenter", helm.karpenter_helm_release.status)
+
+"""
+Export IAM roles
+"""
+export("iam_role_karpenter", iam.karpenter_role.arn)
+export("iam_role_cluster_autoscaler", iam.cluster_autoscaler_role.arn)
+export("iam_role_aws_load_balancer_controller_role", iam.aws_load_balancer_controller_role.arn)
+export("iam_role_ebs_csi_driver_role", iam.ebs_csi_driver_role.arn)
+export("iam_role_external_dns_role", iam.external_dns_role.arn)

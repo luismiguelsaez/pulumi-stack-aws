@@ -266,6 +266,7 @@ if charts_config.require_bool("argocd_enabled"):
         argocd_redis_ha_haproxy_enabled=True,
         argocd_application_controller_replicas=argocd_config.require_int("controller_replicas"),
         argocd_applicationset_controller_replicas=argocd_config.require_int("applicationset_replicas"),
+        argocd_crds_keep=False,
         karpenter_node_enabled=True,
         karpenter_node_provider_name="bottlerocket-default",
         karpenter_provisioner_controller_instance_category=["t"],

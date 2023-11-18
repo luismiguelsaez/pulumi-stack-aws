@@ -1,6 +1,6 @@
 pulumi>=3.0.0,<4.0.0
 pulumi-kubernetes>=4.0.0,<5.0.0
 pulumi-aws>=6.0.2,<7.0.0
-python_pulumi_helm @ git+https://github.com/luismiguelsaez/python-pulumi-helm.git@0.6.7
+python_pulumi_helm @ git+https://github.com/luismiguelsaez/python-pulumi-helm.git@0.6.8
 Jinja2==3.1.2
 requests>=2.31.0,<3.0.0

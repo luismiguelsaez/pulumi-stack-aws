@@ -5,7 +5,7 @@ config:
   charts:aws_load_balancer_controller_enabled: True
   charts:ingress_nginx_external_enabled: True
   charts:argocd_enabled: True
-  charts:argocd_apps_enabled: False
+  charts:argocd_apps_enabled: True
 
   charts:argocd_version: "5.50.1"
 

@@ -295,8 +295,8 @@ if charts_config.require_bool("argocd_enabled"):
 
     if charts_config.require_bool("argocd_apps_enabled"):
         helm_argocd_apps_chart = Release(
-            resource_name="argocd-apps-helm-release",
-            name="argocd-apps",
+            resource_name="argocd-apps-helm-release-test",
+            name="argocd-apps-test",
             repository_opts=RepositoryOptsArgs(
                 repo="https://argoproj.github.io/argo-helm",
             ),
@@ -307,32 +307,25 @@ if charts_config.require_bool("argocd_enabled"):
             values={
                 "applications": [
                     {
-                        "name": "guestbook",
+                        "name": "root",
                         "namespace": "argocd",
                         "additionalLabels": {},
                         "additionalAnnotations": {},
                         "finalizers": [
                             "resources-finalizer.argocd.argoproj.io"
                         ],
-                        "project": "guestbook",
+                        "project": "default",
                         "source": {
-                            "repoURL": "https://github.com/argoproj/argocd-example-apps.git",
+                            "repoURL": "https://github.com/luismiguelsaez/gitops-argocd-self-managed",
                             "targetRevision": "HEAD",
-                            "path": "guestbook",
+                            "path": "applications",
                             "directory": {
                                 "recurse": True
                             }
                         },
-                        "sources": [
-                            {
-                                "repoURL": "https://github.com/argoproj/argocd-example-apps.git",
-                                "path": "guestbook",
-                                "targetRevision": "HEAD"
-                            }
-                        ],
                         "destination": {
                             "server": "https://kubernetes.default.svc",
-                            "namespace": "guestbook"
+                            "namespace": "argocd"
                         },
                         "syncPolicy": {
                             "automated": {
@@ -345,12 +338,6 @@ if charts_config.require_bool("argocd_enabled"):
                         },
                         "revisionHistoryLimit": 10,
                         "ignoreDifferences": [],
-                        "info": [
-                            {
-                                "name": "url",
-                                "value": "https://argoproj.github.io/"
-                            }
-                        ]
                     },
                 ],
             }

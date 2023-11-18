@@ -30,7 +30,6 @@ def karpenter_templates(
           instance_profile=instance_profile,
         )
       with open(file.replace(".j2", ".yaml"), 'w') as f:
-        print(rendered_file)
         f.write(rendered_file)
 
     files = [

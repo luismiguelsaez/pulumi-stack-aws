@@ -1,7 +1,7 @@
 from pulumi import ResourceOptions
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
 from resources import iam
-from stack import aws_config, charts_config, ebs_csi_driver_config, opensearch_config, argocd_config, network, eks, k8s_provider, name_prefix
+from stack import aws_config, charts_config, ebs_csi_driver_config, ingress_config, opensearch_config, argocd_config, network, eks, k8s_provider, name_prefix
 from python_pulumi_helm import releases
 
 """
@@ -205,8 +205,8 @@ if charts_config.require_bool("ingress_nginx_external_enabled"):
         name="ingress-nginx-internet-facing",
         name_suffix="external",
         public=True,
-        ssl_enabled=True,
-        acm_cert_arns=["arn:aws:acm:eu-central-1:484308071187:certificate/aca221b6-0f15-4d58-b1f3-fd27fc14c67a"],
+        ssl_enabled=ingress_config.require_bool("external_ssl_enabled"),
+        acm_cert_arns=ingress_config.require("external_ssl_cert_arns").split(","),
         alb_resource_tags={ "eks-cluster-name": name_prefix, "ingress-name": "ingress-nginx-internet-facing" },
         metrics_enabled=False,
         global_rate_limit_enabled=False,
@@ -222,7 +222,7 @@ if charts_config.require_bool("ingress_nginx_internal_enabled"):
         name="ingress-nginx-internal",
         name_suffix="internal",
         public=False,
-        ssl_enabled=False,
+        ssl_enabled=ingress_config.require_bool("external_ssl_enabled"),
         acm_cert_arns=[],
         alb_resource_tags={ "eks-cluster-name": name_prefix, "ingress-name": "ingress-nginx-internal" },
         metrics_enabled=False,
@@ -260,7 +260,7 @@ if charts_config.require_bool("argocd_enabled"):
         ingress_hostname=argocd_config.require("ingress_hostname"),
         ingress_protocol=argocd_config.require("ingress_protocol"),
         ingress_class_name=argocd_config.require("ingress_class_name"),
-        argocd_redis_ha_enabled=argocd_config.require("redis_ha_enabled"),
+        argocd_redis_ha_enabled=argocd_config.require_bool("redis_ha_enabled"),
         argocd_redis_ha_storage_class=ebs_csi_driver_config.require("storage_class_name"),
         argocd_redis_ha_storage_size=argocd_config.require("redis_ha_storage_size"),
         argocd_redis_ha_haproxy_enabled=True,

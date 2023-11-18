@@ -14,7 +14,7 @@ for key, value in [
     ('argocd', iam.argocd_role.arn),
 ]:
     Parameter(
-        resource_name=key,
+        resource_name=f"eks-cluster-iam-role-{key}",
         type='String',
         name=pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix, "/iam/roles/", key),
         value=value,

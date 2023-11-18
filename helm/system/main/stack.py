@@ -7,6 +7,7 @@ charts_config = Config("charts")
 opensearch_config = Config("opensearch")
 ebs_csi_driver_config = Config("ebs_csi_driver")
 argocd_config = Config("argocd")
+ingress_config = Config("ingress")
 
 org = Config().require("org")
 project = get_project()

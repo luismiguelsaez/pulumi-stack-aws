@@ -2,14 +2,18 @@ config:
   aws:profile: dev
 
   # Helm charts enabled
+  charts:aws_load_balancer_controller_enabled: True
   charts:ingress_nginx_external_enabled: True
-  charts:argocd_enabled: False
+  charts:argocd_enabled: True
 
   charts:argocd_version: "5.50.1"
   charts:argocd_namespace: "argocd"
 
+  ingress:external_ssl_enabled: True
+  ingress:external_ssl_cert_arns: "arn:aws:acm:eu-central-1:484308071187:certificate/aca221b6-0f15-4d58-b1f3-fd27fc14c67a"
+
   argocd:ingress_hostname: "argocd.dev.lokalise.cloud"
-  argocd:ingress_protocol: "http"
+  argocd:ingress_protocol: "https"
   argocd:ingress_class_name: "nginx-external"
   argocd:redis_ha_enabled: True
   argocd:redis_ha_storage_size: "10Gi"

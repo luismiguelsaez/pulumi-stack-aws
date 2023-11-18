@@ -48,6 +48,12 @@ config:
   charts:ingress_nginx_internal_namespace: "ingress"
   charts:argocd_namespace: "argocd"
 
+  # Ingress settings
+  ingress:external_ssl_enabled: True
+  ingress:internal_ssl_enabled: False
+  ingress:external_ssl_cert_arns: ""
+  ingress:internal_ssl_cert_arns: ""
+
   # Opensearch settings
   opensearch:storage_size: 20Gi
   opensearch:replicas: 3

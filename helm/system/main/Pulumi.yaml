@@ -13,12 +13,12 @@ config:
   helm:name_prefix: main
 
   # Helm charts enabled
-  charts:metrics_server_enabled: False
-  charts:cluster_autoscaler_enabled: False
-  charts:karpenter_enabled: False
-  charts:aws_load_balancer_controller_enabled: False
-  charts:external_dns_enabled: False
-  charts:ebs_csi_driver_enabled: False
+  charts:metrics_server_enabled: True
+  charts:cluster_autoscaler_enabled: True
+  charts:karpenter_enabled: True
+  charts:aws_load_balancer_controller_enabled: True
+  charts:external_dns_enabled: True
+  charts:ebs_csi_driver_enabled: True
   charts:ingress_nginx_external_enabled: False
   charts:ingress_nginx_internal_enabled: False
   charts:opensearch_enabled: False
@@ -55,10 +55,14 @@ config:
   opensearch:cpu: 1000m
 
   # ArgoCD settings
-  argocd:ingress_hostname: "argocd.dev.lokalise.cloud"
+  argocd:ingress_hostname: ""
   argocd:controller_replicas: 3
   argocd:applicationset_replicas: 3
   argocd:controller_resources: '{"limits": {"cpu": "1000m", "memory": "2000Mi"}, "requests": {"cpu": "1000m", "memory": "2000Mi"}}'
   argocd:repo_server_resources: '{"limits": {"cpu": "1000m", "memory": "512Mi"}, "requests": {"cpu": "1000m", "memory": "512Mi"}}'
+  argocd:ingress_protocol: "https"
+  argocd:ingress_class_name: "nginx-internal"
+  argocd:redis_ha_enabled: False
+  argocd:redis_ha_storage_size: "20Gi"
 
   ebs_csi_driver:storage_class_name: "ebs"

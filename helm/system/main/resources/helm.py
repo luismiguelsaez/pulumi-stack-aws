@@ -80,7 +80,7 @@ if charts_config.require_bool("karpenter_enabled"):
                 "vmMemoryOverheadPercent": 0.075
             },
         },
-        opts=ResourceOptions(provider=k8s_provider, depends_on=[cluster_autoscaler_helm_release])
+        opts=ResourceOptions(provider=k8s_provider, depends_on=[])
     )
 
 """
@@ -166,7 +166,7 @@ if charts_config.require_bool("ebs_csi_driver_enabled"):
     )
 
 """
-Deploy AWS EBS CSI Driver Helm chart
+Deploy External DNS Helm chart
 """
 if charts_config.require_bool("external_dns_enabled"):
     external_dns_release = Release(
@@ -213,7 +213,7 @@ if charts_config.require_bool("ingress_nginx_external_enabled"):
         karpenter_node_enabled=False,
         provider=k8s_provider,
         namespace=charts_config.require("ingress_nginx_external_namespace"),
-        depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release]
+        depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release, aws_load_balancer_controller_release]
     )
 
 if charts_config.require_bool("ingress_nginx_internal_enabled"):
@@ -230,7 +230,7 @@ if charts_config.require_bool("ingress_nginx_internal_enabled"):
         karpenter_node_enabled=False,
         provider=k8s_provider,
         namespace=charts_config.require("ingress_nginx_internal_namespace"),
-        depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release]
+        depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release, aws_load_balancer_controller_release]
     )
 
 if charts_config.require_bool("opensearch_enabled"):
@@ -258,11 +258,11 @@ if charts_config.require_bool("argocd_enabled"):
         namespace=charts_config.require("argocd_namespace"),
         depends_on=[karpenter_helm_release, helm_ingress_nginx_external_chart],
         ingress_hostname=argocd_config.require("ingress_hostname"),
-        ingress_protocol="http",
-        ingress_class_name="nginx-external",
-        argocd_redis_ha_enabled=False,
+        ingress_protocol=argocd_config.require("ingress_protocol"),
+        ingress_class_name=argocd_config.require("ingress_class_name"),
+        argocd_redis_ha_enabled=argocd_config.require("redis_ha_enabled"),
         argocd_redis_ha_storage_class=ebs_csi_driver_config.require("storage_class_name"),
-        argocd_redis_ha_storage_size="20Gi",
+        argocd_redis_ha_storage_size=argocd_config.require("redis_ha_storage_size"),
         argocd_redis_ha_haproxy_enabled=True,
         argocd_application_controller_replicas=argocd_config.require_int("controller_replicas"),
         argocd_applicationset_controller_replicas=argocd_config.require_int("applicationset_replicas"),

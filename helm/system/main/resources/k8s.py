@@ -61,12 +61,17 @@ if charts_config.require_bool("karpenter_enabled"):
 
     from resources.helm import karpenter_helm_release
 
-    karpenter.karpenter_templates(
-        name="karpenter-aws-node-templates",
-        provider=k8s_provider,
-        manifests_path="resources/nodetemplates",
-        ssh_public_key=public_ssh_key,
-        sg_selector_tags=cluster_tags,
-        subnet_selector_tags=discovery_tags,
-        depends_on=[karpenter_helm_release]
+    Output.all(
+        iam.karpenter_node_role_instance_profile.name
+    ).apply(lambda args:
+        karpenter.karpenter_templates(
+            name="karpenter-aws-node-templates",
+            provider=k8s_provider,
+            manifests_path="resources/nodetemplates",
+            ssh_public_key=public_ssh_key,
+            instance_profile=args[0],
+            sg_selector_tags=cluster_tags,
+            subnet_selector_tags=discovery_tags,
+            depends_on=[karpenter_helm_release]
+        )
     )

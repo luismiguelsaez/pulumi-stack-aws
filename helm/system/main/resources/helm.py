@@ -54,18 +54,24 @@ Deploy Karpenter Helm chart
 """
 if charts_config.require_bool("karpenter_enabled"):
     karpenter_helm_release = Release(
-        "karpenter-helm-release",
-        repository_opts=RepositoryOptsArgs(
-            repo="https://charts.karpenter.sh",
-        ),
+        resource_name="karpenter-helm-release",
+        name="karpenter",
+        chart="oci://public.ecr.aws/karpenter/karpenter",
         version=charts_config.require("karpenter_version"),
-        chart="karpenter",
         namespace=charts_config.require("karpenter_namespace"),
         create_namespace=True,
-        name="karpenter",
         values={
             "controller": {
-                "logLevel": "info",
+                "resources": {
+                    "requests": {
+                        "cpu": "1",
+                        "memory": "1Gi",
+                    },
+                    "limits": {
+                        "cpu": "1",
+                        "memory": "1Gi",
+                    },
+                },
             },
             "serviceAccount": {
                 "create": True,
@@ -73,14 +79,21 @@ if charts_config.require_bool("karpenter_enabled"):
                     "eks.amazonaws.com/role-arn": iam.karpenter_role.arn,
                 }
             },
-            "clusterName": eks.get_output("eks_cluster_name"),
-            "clusterEndpoint": eks.get_output("eks_cluster_endpoint"),
-            "aws": {
-                "defaultInstanceProfile": iam.karpenter_node_role_instance_profile.name,
-                "vmMemoryOverheadPercent": 0.075
+            # Versions up to v0.31.x
+            #"aws": {
+            #    "clusterName": eks.get_output("eks_cluster_name"),
+            #    "clusterEndpoint": eks.get_output("eks_cluster_endpoint"),
+            #},
+            "settings": {
+                # Version v0.32.x and above
+                "clusterName": eks.get_output("eks_cluster_name"),
+                "clusterEndpoint": eks.get_output("eks_cluster_endpoint"),
+                "vmMemoryOverheadPercent": 0.075,
+                #"defaultInstanceProfile": iam.karpenter_node_role_instance_profile.name,
+                #"assumeRoleARN": iam.karpenter_role.arn,
             },
         },
-        opts=ResourceOptions(provider=k8s_provider, depends_on=[])
+        opts=ResourceOptions(provider=k8s_provider, depends_on=[cluster_autoscaler_helm_release])
     )
 
 """
@@ -88,7 +101,8 @@ Deploy AWS Load Balancer Controller Helm chart
 """
 if charts_config.require_bool("aws_load_balancer_controller_enabled"):
     aws_load_balancer_controller_release = Release(
-        "aws-load-balancer-controller-helm-release",
+        resource_name="aws-load-balancer-controller-helm-release",
+        name="aws-load-balancer-controller",
         repository_opts=RepositoryOptsArgs(
             repo="https://aws.github.io/eks-charts",
         ),
@@ -96,7 +110,6 @@ if charts_config.require_bool("aws_load_balancer_controller_enabled"):
         chart="aws-load-balancer-controller",
         namespace=charts_config.require("aws_load_balancer_controller_namespace"),
         create_namespace=True,
-        name="aws-load-balancer-controller",
         values={
             "clusterName": eks.get_output("eks_cluster_name"),
             "region": aws_config.require("region"),
@@ -120,7 +133,8 @@ Deploy AWS EBS CSI Driver Helm chart
 """
 if charts_config.require_bool("ebs_csi_driver_enabled"):
     ebs_csi_driver_release = Release(
-        "ebs-csi-driver-helm-release",
+        resource_name="ebs-csi-driver-helm-release",
+        name="aws-ebs-csi-driver",
         repository_opts=RepositoryOptsArgs(
             repo="https://kubernetes-sigs.github.io/aws-ebs-csi-driver",
         ),
@@ -128,7 +142,6 @@ if charts_config.require_bool("ebs_csi_driver_enabled"):
         chart="aws-ebs-csi-driver",
         namespace=charts_config.require("ebs_csi_driver_namespace"),
         create_namespace=True,
-        name="aws-ebs-csi-driver",
         values={
             "storageClasses": [
                 {
@@ -170,14 +183,14 @@ Deploy External DNS Helm chart
 """
 if charts_config.require_bool("external_dns_enabled"):
     external_dns_release = Release(
-        "external-dns-helm-release",
+        resource_name="external-dns-helm-release",
+        name="external-dns",
         repository_opts=RepositoryOptsArgs(
             repo="https://kubernetes-sigs.github.io/external-dns",
         ),
         version=charts_config.require("external_dns_version"),
         chart="external-dns",
         namespace=charts_config.require("external_dns_namespace"),
-        name="external-dns",
         create_namespace=True,
         values={
             "provider": "aws",
@@ -255,8 +268,9 @@ if charts_config.require_bool("argocd_enabled"):
     helm_argocd_chart = releases.argocd(
         version=charts_config.require("argocd_version"),
         provider=k8s_provider,
+        name="argo-cd",
         namespace=charts_config.require("argocd_namespace"),
-        depends_on=[karpenter_helm_release, helm_ingress_nginx_external_chart],
+        depends_on=[karpenter_helm_release, helm_ingress_nginx_external_chart, ebs_csi_driver_release],
         ingress_hostname=argocd_config.require("ingress_hostname"),
         ingress_protocol=argocd_config.require("ingress_protocol"),
         ingress_class_name=argocd_config.require("ingress_class_name"),
@@ -278,3 +292,66 @@ if charts_config.require_bool("argocd_enabled"):
         controller_resources=argocd_config.require_object("controller_resources"),
         repo_server_resources=argocd_config.require_object("repo_server_resources"),
     )
+
+    if charts_config.require_bool("argocd_apps_enabled"):
+        helm_argocd_apps_chart = Release(
+            resource_name="argocd-apps-helm-release",
+            name="argocd-apps",
+            repository_opts=RepositoryOptsArgs(
+                repo="https://argoproj.github.io/argo-helm",
+            ),
+            version=charts_config.require("argocd_apps_version"),
+            chart="argocd-apps",
+            namespace=charts_config.require("argocd_apps_namespace"),
+            create_namespace=True,
+            values={
+                "applications": [
+                    {
+                        "name": "guestbook",
+                        "namespace": "argocd",
+                        "additionalLabels": {},
+                        "additionalAnnotations": {},
+                        "finalizers": [
+                            "resources-finalizer.argocd.argoproj.io"
+                        ],
+                        "project": "guestbook",
+                        "source": {
+                            "repoURL": "https://github.com/argoproj/argocd-example-apps.git",
+                            "targetRevision": "HEAD",
+                            "path": "guestbook",
+                            "directory": {
+                                "recurse": True
+                            }
+                        },
+                        "sources": [
+                            {
+                                "repoURL": "https://github.com/argoproj/argocd-example-apps.git",
+                                "path": "guestbook",
+                                "targetRevision": "HEAD"
+                            }
+                        ],
+                        "destination": {
+                            "server": "https://kubernetes.default.svc",
+                            "namespace": "guestbook"
+                        },
+                        "syncPolicy": {
+                            "automated": {
+                                "prune": False,
+                                "selfHeal": True
+                            },
+                            "syncOptions": [
+                                "CreateNamespace=true"
+                            ]
+                        },
+                        "revisionHistoryLimit": 10,
+                        "ignoreDifferences": [],
+                        "info": [
+                            {
+                                "name": "url",
+                                "value": "https://argoproj.github.io/"
+                            }
+                        ]
+                    },
+                ],
+            }
+        )

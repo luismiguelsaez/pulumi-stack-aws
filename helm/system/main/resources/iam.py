@@ -32,11 +32,11 @@ karpenter_node_role = Role(
 )
 
 karpenter_node_role_instance_profile = InstanceProfile(
-    f"helm-{name_prefix}-karpenter-node",
-    name=f"helm-{name_prefix}-karpenter-node",
+    resource_name=f"KarpenterNodeRole-{name_prefix}",
+    name=f"KarpenterNodeRole-{name_prefix}",
     role=karpenter_node_role.name,
     tags={
-        "Name": f"helm-{name_prefix}-karpenter-node",
+        "Name": f"KarpenterNodeRole-{name_prefix}",
     } | common_tags
 )
 

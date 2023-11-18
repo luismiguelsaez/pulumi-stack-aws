@@ -1,10 +1,9 @@
 from pulumi_kubernetes.yaml import ConfigFile
 from pulumi_kubernetes import Provider
-from pulumi import ResourceOptions
+from pulumi import ResourceOptions, Output
 from os import path
 import glob
 import jinja2
-import json
 
 def karpenter_templates(
     name: str,
@@ -13,6 +12,7 @@ def karpenter_templates(
     ssh_public_key: str,
     sg_selector_tags: dict = {},
     subnet_selector_tags: dict = {},
+    instance_profile: str = "default",
     depends_on: list = []
   ):
 
@@ -27,8 +27,10 @@ def karpenter_templates(
           ssh_public_key=ssh_public_key,
           sg_selector_tags=sg_selector_tags,
           subnet_selector_tags=subnet_selector_tags,
+          instance_profile=instance_profile,
         )
       with open(file.replace(".j2", ".yaml"), 'w') as f:
+        print(rendered_file)
         f.write(rendered_file)
 
     files = [

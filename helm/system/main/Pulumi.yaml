@@ -23,10 +23,11 @@ config:
   charts:ingress_nginx_internal_enabled: False
   charts:opensearch_enabled: False
   charts:argocd_enabled: False
+  charts:argocd_apps_enabled: False
 
   # Helm charts versions
   charts:metrics_server_version: "3.11.0"
-  charts:karpenter_version: "0.16.3"
+  charts:karpenter_version: "v0.32.1"
   charts:cluster_autoscaler_version: "9.29.3"
   charts:aws_load_balancer_controller_version: "1.6.1"
   charts:ebs_csi_driver_version: "2.23.1"
@@ -35,6 +36,7 @@ config:
   charts:ingress_nginx_external_version: "4.2.5"
   charts:ingress_nginx_internal_version: "4.2.5"
   charts:argocd_version: "5.46.8"
+  charts:argocd_apps_version: "1.4.1"
 
   # Helm charts namespaces
   charts:metrics_server_namespace: "kube-system"
@@ -47,6 +49,7 @@ config:
   charts:ingress_nginx_external_namespace: "ingress"
   charts:ingress_nginx_internal_namespace: "ingress"
   charts:argocd_namespace: "argocd"
+  charts:argocd_apps_namespace: "argocd"
 
   # Ingress settings
   ingress:external_ssl_enabled: True

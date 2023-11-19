@@ -63,6 +63,9 @@ eks_nodegroup_system = eks.NodeGroup(
     update_config=eks.NodeGroupUpdateConfigArgs(
         max_unavailable=1,
     ),
+    labels={
+        "role": "system",
+    },
     tags={
         "Name": f"{name_prefix}-system",
     } | common_tags,

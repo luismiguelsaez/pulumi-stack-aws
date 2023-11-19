@@ -318,7 +318,7 @@ if charts_config.require_bool("argocd_enabled"):
                         "source": {
                             "repoURL": "https://github.com/luismiguelsaez/gitops-argocd-self-managed",
                             "targetRevision": "HEAD",
-                            "path": "applications",
+                            #"path": "applications",
                             "directory": {
                                 "recurse": True
                             }

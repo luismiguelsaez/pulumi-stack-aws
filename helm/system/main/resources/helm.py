@@ -334,15 +334,16 @@ if charts_config.require_bool("argocd_enabled"):
                                 "selfHeal": True
                             },
                             "syncOptions": [
+                                "Validate=true",
                                 "CreateNamespace=true",
                                 "RespectIgnoreDifferences=true",
                             ],
                             "retry": {
-                                "limit": "10",
+                                "limit": 10,
                                 "backoff": {
-                                    "duration": "5",
-                                    "factor": "2",
-                                    "maxDuration": "300"
+                                    "duration": "5s",
+                                    "factor": 2,
+                                    "maxDuration": "2m"
                                 }
                             }
                         },

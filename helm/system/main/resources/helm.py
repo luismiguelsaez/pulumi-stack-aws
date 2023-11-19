@@ -295,8 +295,8 @@ if charts_config.require_bool("argocd_enabled"):
 
     if charts_config.require_bool("argocd_apps_enabled"):
         helm_argocd_apps_chart = Release(
-            resource_name="argocd-apps-helm-release-test",
-            name="argocd-apps-test",
+            resource_name="argocd-apps-helm-release",
+            name="argocd-apps",
             repository_opts=RepositoryOptsArgs(
                 repo="https://argoproj.github.io/argo-helm",
             ),
@@ -304,6 +304,7 @@ if charts_config.require_bool("argocd_enabled"):
             chart="argocd-apps",
             namespace=charts_config.require("argocd_apps_namespace"),
             create_namespace=True,
+            opts=ResourceOptions(provider=k8s_provider, depends_on=[helm_argocd_chart]),
             values={
                 "applications": [
                     {
@@ -318,7 +319,7 @@ if charts_config.require_bool("argocd_enabled"):
                         "source": {
                             "repoURL": "https://github.com/luismiguelsaez/gitops-argocd-self-managed",
                             "targetRevision": "HEAD",
-                            #"path": "applications",
+                            "path": ".",
                             "directory": {
                                 "recurse": True
                             }

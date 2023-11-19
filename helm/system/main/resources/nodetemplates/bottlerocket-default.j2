@@ -2,7 +2,6 @@ apiVersion: karpenter.k8s.aws/v1alpha1
 kind: AWSNodeTemplate
 metadata:
   name: bottlerocket-default
-  finalizers: []
   annotations:
     argocd.argoproj.io/sync-wave: "0"
 spec:

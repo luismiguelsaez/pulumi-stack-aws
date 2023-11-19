@@ -321,7 +321,7 @@ if charts_config.require_bool("argocd_enabled"):
                             "targetRevision": "HEAD",
                             "path": ".",
                             "directory": {
-                                "recurse": True
+                                "recurse": False
                             }
                         },
                         "destination": {
@@ -334,8 +334,17 @@ if charts_config.require_bool("argocd_enabled"):
                                 "selfHeal": True
                             },
                             "syncOptions": [
-                                "CreateNamespace=true"
-                            ]
+                                "CreateNamespace=true",
+                                "RespectIgnoreDifferences=true",
+                            ],
+                            "retry": {
+                                "limit": "10",
+                                "backoff": {
+                                    "duration": "5",
+                                    "factor": "2",
+                                    "maxDuration": "300"
+                                }
+                            }
                         },
                         "revisionHistoryLimit": 10,
                         "ignoreDifferences": [],

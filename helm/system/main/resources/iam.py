@@ -1,7 +1,8 @@
 from pulumi_aws.iam import Role, Policy, RolePolicyAttachment, InstanceProfile
+from pulumi_aws import get_caller_identity
 from pulumi import Output
 import json
-from stack import eks, common_tags, name_prefix
+from stack import aws_config, eks, common_tags, name_prefix
 from tools.iam import create_policy_from_file, create_role_oidc, create_role_with_attached_policy
 from os import path
 
@@ -155,6 +156,66 @@ RolePolicyAttachment(
     policy_arn=karpenter_policy.arn
 )
 
+current = get_caller_identity()
+
+argocd_policy = Policy(
+    f"helm-{name_prefix}-argocd",
+    name=f"helm-{name_prefix}-argocd",
+    policy=Output.json_dumps(
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "secretsmanager:GetResourcePolicy",
+                        "secretsmanager:GetSecretValue",
+                        "secretsmanager:DescribeSecret",
+                        "secretsmanager:ListSecretVersionIds"
+                    ],
+                    "Resource": [
+                        f"arn:aws:secretsmanager:{aws_config.get('region')}:{current.account_id}:secret:/eks/cluster/*",
+                    ]
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": "secretsmanager:ListSecrets",
+                    "Resource": "*"
+                }
+            ]
+        }
+    ),
+)
+
+argocd_role = Role(
+    f"helm-{name_prefix}-argocd",
+    name=f"helm-{name_prefix}-argocd",
+    assume_role_policy=Output.json_dumps(
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "",
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Federated": eks.get_output("eks_oidc_provider_arn")
+                    },
+                    "Action": "sts:AssumeRoleWithWebIdentity"
+                }
+            ]
+        }
+    ),
+    tags={
+        "Name": f"helm-{name_prefix}-argocd",
+    } | common_tags
+)
+
+RolePolicyAttachment(
+    f"helm-{name_prefix}-argocd-main",
+    role=argocd_role.name,
+    policy_arn=argocd_policy.arn
+)
+
 """
 Create cloud controllers roles with OIDC/WebIdentity
 """
@@ -195,11 +256,11 @@ external_dns_role = create_role_with_attached_policy(
     } | common_tags
 )
 
-argocd_role = create_role_with_attached_policy(
-    f"helm-{name_prefix}-argocd",
-    path.join(path.dirname(__file__), "policies/argocd.json"),
-    eks.get_output("eks_oidc_provider_arn"),
-    tags={
-        "Name": f"helm-{name_prefix}-argocd",
-    } | common_tags
-)
+#argocd_role = create_role_with_attached_policy(
+#    f"helm-{name_prefix}-argocd",
+#    path.join(path.dirname(__file__), "policies/argocd.json"),
+#    eks.get_output("eks_oidc_provider_arn"),
+#    tags={
+#        "Name": f"helm-{name_prefix}-argocd",
+#    } | common_tags
+#)

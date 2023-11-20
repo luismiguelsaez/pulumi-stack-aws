@@ -1,10 +1,12 @@
 from pulumi_aws.ssm import Parameter
+from pulumi_aws.secretsmanager import Secret, SecretVersion
 import pulumi
 from resources import iam
 from stack import eks
 
 param_eks_cluster_prefix = eks.get_output('eks_cluster_name')
 
+secrets = {}
 for key, value in [
     ('karpenter', iam.karpenter_role.arn),
     ('cluster_autoscaler', iam.cluster_autoscaler_role.arn),
@@ -13,9 +15,20 @@ for key, value in [
     ('external_dns', iam.external_dns_role.arn),
     ('argocd', iam.argocd_role.arn),
 ]:
-    Parameter(
+    #Parameter(
+    #    resource_name=f"eks-cluster-iam-role-{key}",
+    #    type='String',
+    #    name=pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix, "/iam/roles/", key),
+    #    value=value,
+    #)
+    
+    secrets[key] = Secret(
         resource_name=f"eks-cluster-iam-role-{key}",
-        type='String',
         name=pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix, "/iam/roles/", key),
-        value=value,
+    )
+    
+    SecretVersion(
+        resource_name=f"eks-cluster-iam-role-{key}",
+        secret_id=secrets[key].id,
+        secret_string=value,
     )

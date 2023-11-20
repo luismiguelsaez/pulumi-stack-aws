@@ -1,4 +1,4 @@
-from pulumi import ResourceOptions
+from pulumi import ResourceOptions, Output
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
 from resources import iam
 from stack import aws_config, charts_config, ebs_csi_driver_config, ingress_config, opensearch_config, argocd_config, network, eks, k8s_provider, name_prefix
@@ -199,6 +199,8 @@ if charts_config.require_bool("external_dns_enabled"):
             "deploymentStrategy": {
                 "type": "Recreate",
             },
+            "txtOwnerId": Output.concat("external-dns", eks.get_output("eks_cluster_name")), 
+            "txtSuffix": "",
             "serviceAccount": {
                 "create": True,
                 "annotations": {

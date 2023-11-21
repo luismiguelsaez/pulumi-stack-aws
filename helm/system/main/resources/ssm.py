@@ -2,6 +2,7 @@ from pulumi_aws.secretsmanager import Secret, SecretVersion
 import pulumi
 from resources import iam
 from stack import eks, aws_config, ingress_config
+from requests import get
 
 """
 Create secrets to share info with ArgoCD
@@ -13,6 +14,8 @@ param_eks_cluster_endpoint = eks.get_output('eks_cluster_endpoint')
 param_eks_cluster_region = aws_config.require("region")
 
 secrets_root_path = pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix)
+
+public_ssh_key = get("https://github.com/luismiguelsaez.keys").text.strip()
 
 # Create component IAM roles secret
 
@@ -51,6 +54,7 @@ cluster_info = {
     'name': param_eks_cluster_prefix,
     'endpoint': param_eks_cluster_endpoint,
     'region': param_eks_cluster_region,
+    'ssh_public_key': public_ssh_key,
 }
 
 SecretVersion(

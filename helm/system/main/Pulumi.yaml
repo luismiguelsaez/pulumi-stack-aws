@@ -56,6 +56,8 @@ config:
   ingress:internal_ssl_enabled: False
   ingress:external_ssl_cert_arns: ""
   ingress:internal_ssl_cert_arns: ""
+  ingress:external_domain: ""
+  ingress:internal_domain: ""
 
   # Opensearch settings
   opensearch:storage_size: 20Gi

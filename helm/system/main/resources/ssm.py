@@ -1,7 +1,7 @@
 from pulumi_aws.secretsmanager import Secret, SecretVersion
 import pulumi
 from resources import iam
-from stack import eks, aws_config
+from stack import eks, aws_config, ingress_config
 
 """
 Create secrets to share info with ArgoCD
@@ -53,4 +53,25 @@ SecretVersion(
     resource_name=f"eks-cluster-info",
     secret_id=cluster_info_secret.id,
     secret_string=pulumi.Output.json_dumps(cluster_info),
+)
+
+# Create ingress secret
+
+ingress_secret = Secret(
+    resource_name=f"eks-cluster-ingress",
+    name=pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix, "/ingress"),
+    force_overwrite_replica_secret=True,
+)
+
+ingress = {
+    'external_domain': ingress_config.require("external_domain"),
+    'external_ssl_cert_arns': ingress_config.require("external_ssl_cert_arns"),
+    'internal_domain': ingress_config.require("internal_domain"),
+    'internal_ssl_cert_arns': ingress_config.require("internal_ssl_cert_arns"),
+}
+
+SecretVersion(
+    resource_name=f"eks-cluster-ingress",
+    secret_id=ingress_secret.id,
+    secret_string=pulumi.Output.json_dumps(ingress),
 )

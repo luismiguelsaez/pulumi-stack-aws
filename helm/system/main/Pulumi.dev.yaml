@@ -11,6 +11,8 @@ config:
 
   ingress:external_ssl_enabled: True
   ingress:external_ssl_cert_arns: "arn:aws:acm:eu-central-1:484308071187:certificate/aca221b6-0f15-4d58-b1f3-fd27fc14c67a"
+  ingress:external_domain: ".dev.lokalise.cloud"
+  ingress:internal_domain: ".dev.lokalise.cloud"
 
   argocd:ingress_hostname: "argocd.dev.lokalise.cloud"
   argocd:ingress_protocol: "https"

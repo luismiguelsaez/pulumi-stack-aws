@@ -323,9 +323,7 @@ if charts_config.require_bool("argocd_enabled"):
                             "repoURL": "https://github.com/luismiguelsaez/gitops-argocd-self-managed",
                             "targetRevision": "HEAD",
                             "path": ".",
-                            "directory": {
-                                "recurse": False
-                            }
+                            "plugin": {}, # Uses plugin auto-discovery
                         },
                         "destination": {
                             "server": "https://kubernetes.default.svc",

@@ -28,14 +28,14 @@ config:
   # Helm charts versions
   charts:metrics_server_version: "3.11.0"
   charts:karpenter_version: "v0.32.1"
-  charts:cluster_autoscaler_version: "9.29.3"
-  charts:aws_load_balancer_controller_version: "1.6.1"
-  charts:ebs_csi_driver_version: "2.23.1"
+  charts:cluster_autoscaler_version: "9.32.0"
+  charts:aws_load_balancer_controller_version: "1.6.2"
+  charts:ebs_csi_driver_version: "2.25.0"
   charts:external_dns_version: "1.13.1"
   charts:opensearch_version: "2.14.1"
-  charts:ingress_nginx_external_version: "4.2.5"
-  charts:ingress_nginx_internal_version: "4.2.5"
-  charts:argocd_version: "5.46.8"
+  charts:ingress_nginx_external_version: "4.8.3"
+  charts:ingress_nginx_internal_version: "4.8.3"
+  charts:argocd_version: "5.51.4"
   charts:argocd_apps_version: "1.4.1"
 
   # Helm charts namespaces

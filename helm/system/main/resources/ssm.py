@@ -12,12 +12,15 @@ param_eks_cluster_prefix = eks.get_output('eks_cluster_name')
 param_eks_cluster_endpoint = eks.get_output('eks_cluster_endpoint')
 param_eks_cluster_region = aws_config.require("region")
 
+secrets_root_path = pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix)
+
 # Create component IAM roles secret
 
 roles_system_secret = Secret(
     resource_name=f"eks-cluster-iam-roles",
-    name=pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix, "/iam/roles"),
+    name=pulumi.Output.concat(secrets_root_path, "/info/iam/roles"),
     force_overwrite_replica_secret=True,
+    recovery_window_in_days=0,
 )
 
 roles_system = {
@@ -39,8 +42,9 @@ SecretVersion(
 
 cluster_info_secret = Secret(
     resource_name=f"eks-cluster-info",
-    name=pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix, "/info"),
+    name=pulumi.Output.concat(secrets_root_path, "/info/details"),
     force_overwrite_replica_secret=True,
+    recovery_window_in_days=0,
 )
 
 cluster_info = {
@@ -59,8 +63,9 @@ SecretVersion(
 
 ingress_secret = Secret(
     resource_name=f"eks-cluster-ingress",
-    name=pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix, "/ingress"),
+    name=pulumi.Output.concat(secrets_root_path, "/info/ingress"),
     force_overwrite_replica_secret=True,
+    recovery_window_in_days=0,
 )
 
 ingress = {

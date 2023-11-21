@@ -283,6 +283,7 @@ if charts_config.require_bool("argocd_enabled"):
         argocd_application_controller_replicas=argocd_config.require_int("controller_replicas"),
         argocd_applicationset_controller_replicas=argocd_config.require_int("applicationset_replicas"),
         argocd_crds_keep=False,
+        argocd_plugins_enabled=False,
         argocd_iam_role_arn=iam.argocd_role.arn,
         karpenter_node_enabled=True,
         karpenter_node_provider_name="bottlerocket-default",

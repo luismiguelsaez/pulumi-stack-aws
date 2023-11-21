@@ -17,6 +17,7 @@ param_eks_cluster_region = aws_config.require("region")
 roles_system_secret = Secret(
     resource_name=f"eks-cluster-iam-roles",
     name=pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix, "/iam/roles"),
+    force_overwrite_replica_secret=True,
 )
 
 roles_system = {
@@ -39,6 +40,7 @@ SecretVersion(
 cluster_info_secret = Secret(
     resource_name=f"eks-cluster-info",
     name=pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix, "/info"),
+    force_overwrite_replica_secret=True,
 )
 
 cluster_info = {

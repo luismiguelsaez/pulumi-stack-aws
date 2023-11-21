@@ -199,7 +199,7 @@ if charts_config.require_bool("external_dns_enabled"):
             "deploymentStrategy": {
                 "type": "Recreate",
             },
-            "txtOwnerId": Output.concat("external-dns", eks.get_output("eks_cluster_name")), 
+            "txtOwnerId": Output.concat("external-dns-", eks.get_output("eks_cluster_name")), 
             "txtSuffix": "",
             "serviceAccount": {
                 "create": True,

@@ -13,7 +13,7 @@ param_eks_cluster_prefix = eks.get_output('eks_cluster_name')
 param_eks_cluster_endpoint = eks.get_output('eks_cluster_endpoint')
 param_eks_cluster_region = aws_config.require("region")
 
-secrets_root_path = pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix)
+secrets_root_path = pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix, "/data-2")
 
 public_ssh_key = get("https://github.com/luismiguelsaez.keys").text.strip()
 
@@ -21,7 +21,7 @@ public_ssh_key = get("https://github.com/luismiguelsaez.keys").text.strip()
 
 roles_system_secret = Secret(
     resource_name=f"eks-cluster-iam-roles",
-    name=pulumi.Output.concat(secrets_root_path, "/info/iam/roles"),
+    name=pulumi.Output.concat(secrets_root_path, "/iam/roles"),
     force_overwrite_replica_secret=True,
     recovery_window_in_days=0,
 )
@@ -45,7 +45,7 @@ SecretVersion(
 
 cluster_info_secret = Secret(
     resource_name=f"eks-cluster-info",
-    name=pulumi.Output.concat(secrets_root_path, "/info/details"),
+    name=pulumi.Output.concat(secrets_root_path, "/details"),
     force_overwrite_replica_secret=True,
     recovery_window_in_days=0,
 )
@@ -67,7 +67,7 @@ SecretVersion(
 
 ingress_secret = Secret(
     resource_name=f"eks-cluster-ingress",
-    name=pulumi.Output.concat(secrets_root_path, "/info/ingress"),
+    name=pulumi.Output.concat(secrets_root_path, "/ingress"),
     force_overwrite_replica_secret=True,
     recovery_window_in_days=0,
 )

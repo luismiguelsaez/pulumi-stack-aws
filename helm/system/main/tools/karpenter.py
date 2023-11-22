@@ -13,6 +13,7 @@ def karpenter_templates(
     sg_selector_tags: dict = {},
     subnet_selector_tags: dict = {},
     instance_profile: str = "default",
+    eks_cluster_security_group_id: str = "",
     depends_on: list = []
   ):
 
@@ -27,6 +28,7 @@ def karpenter_templates(
           ssh_public_key=ssh_public_key,
           sg_selector_tags=sg_selector_tags,
           subnet_selector_tags=subnet_selector_tags,
+          eks_cluster_security_group_id=eks_cluster_security_group_id,
           instance_profile=instance_profile,
         )
       with open(file.replace(".j2", ".yaml"), 'w') as f:

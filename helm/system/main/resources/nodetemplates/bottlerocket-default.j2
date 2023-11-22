@@ -4,6 +4,7 @@ metadata:
   name: bottlerocket-default
   annotations:
     argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-options: Prune=true
 spec:
   amiFamily: Bottlerocket
   instanceProfile: {{ instance_profile }}

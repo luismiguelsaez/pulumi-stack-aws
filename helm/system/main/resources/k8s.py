@@ -72,6 +72,7 @@ if charts_config.require_bool("karpenter_enabled"):
             instance_profile=args[0],
             sg_selector_tags=cluster_tags,
             subnet_selector_tags=discovery_tags,
+            eks_cluster_security_group_id=eks.get_output("eks_cluster_security_group_id"),
             depends_on=[karpenter_helm_release]
         )
     )

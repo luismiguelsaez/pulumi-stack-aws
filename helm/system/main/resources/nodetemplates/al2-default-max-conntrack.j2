@@ -4,6 +4,7 @@ metadata:
   name: al2-max-conntrack
   annotations:
     argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-options: Prune=true
 spec:
   amiFamily: AL2
   instanceProfile: {{ instance_profile }}

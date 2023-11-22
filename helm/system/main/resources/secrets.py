@@ -9,12 +9,12 @@ Create secrets to share info with ArgoCD
 Secrets are retrieved later during ArgoCD bootstrap using `argocd-vault-plugin` and placeholders
 """
 
-param_eks_cluster_prefix = eks.get_output('eks_cluster_name')
+param_eks_cluster_name = eks.get_output('eks_cluster_name')
 param_eks_cluster_endpoint = eks.get_output('eks_cluster_endpoint')
 param_eks_cluster_region = aws_config.require("region")
 param_eks_cluster_security_group = eks.get_output('eks_cluster_security_group_id')
 
-secrets_root_path = pulumi.Output.concat("/eks/cluster/", param_eks_cluster_prefix, "/data-2")
+secrets_root_path = pulumi.Output.concat("/eks/cluster/", param_eks_cluster_name, "/secrets")
 
 public_ssh_key = get("https://github.com/luismiguelsaez.keys").text.strip()
 
@@ -52,7 +52,7 @@ cluster_info_secret = Secret(
 )
 
 cluster_info = {
-    'name': param_eks_cluster_prefix,
+    'name': param_eks_cluster_name,
     'endpoint': param_eks_cluster_endpoint,
     'region': param_eks_cluster_region,
     'security_group': param_eks_cluster_security_group,

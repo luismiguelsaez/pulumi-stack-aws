@@ -26,6 +26,7 @@ cluster_tags = {
 
 discovery_tags = {
     "karpenter.sh/discovery": name_prefix,
+    #"aws:eks:cluster-name": name_prefix,
 }
 
 """

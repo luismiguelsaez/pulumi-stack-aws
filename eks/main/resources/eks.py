@@ -27,8 +27,6 @@ eks_cluster = eks.Cluster(
     } | common_tags | discovery_tags,
 )
 
-eks_cluster_info = eks.get_cluster(name=f"{name_prefix}", opts=InvokeOptions(parent=eks_cluster))
-
 """
 Create EKS OIDC provider
 """

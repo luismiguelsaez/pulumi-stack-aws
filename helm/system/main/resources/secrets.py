@@ -3,16 +3,18 @@ import pulumi
 from resources import iam
 from stack import eks, aws_config, ingress_config
 from requests import get
+from pulumi_aws.eks import get_cluster
 
 """
 Create secrets to share info with ArgoCD
 Secrets are retrieved later during ArgoCD bootstrap using `argocd-vault-plugin` and placeholders
 """
 
+# Get EKS cluster info
 param_eks_cluster_name = eks.get_output('eks_cluster_name')
 param_eks_cluster_endpoint = eks.get_output('eks_cluster_endpoint')
 param_eks_cluster_region = aws_config.require("region")
-param_eks_cluster_security_group = eks.get_output('eks_cluster_security_group_id')
+param_eks_cluster_security_group = get_cluster(name=param_eks_cluster_name).vpc_config.cluster_security_group_id
 
 secrets_root_path = pulumi.Output.concat("/eks/cluster/", param_eks_cluster_name, "/secrets")
 

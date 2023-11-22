@@ -1,4 +1,4 @@
-from resources import helm, k8s, iam, ssm
+from resources import helm, k8s, iam, secrets
 from pulumi import export
 import yaml
 from stack import charts_config

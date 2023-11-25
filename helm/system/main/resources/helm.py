@@ -296,6 +296,7 @@ if charts_config.require_bool("argocd_enabled"):
                     "exec.enabled": "true",
                     "admin.enabled": "true",
                     "timeout.reconciliation": "180s",
+                    "resource.customizations": "argoproj.io/Application:\n  health.lua: |\n    hs = {}\n    hs.status = \"Progressing\"\n    hs.message = \"\"\n    if obj.status ~= nil then\n      if obj.status.health ~= nil then\n        hs.status = obj.status.health.status\n        if obj.status.health.message ~= nil then\n          hs.message = obj.status.health.message\n        end\n      end\n    end\n    return hs\n",
                 },
             },
             "server": {

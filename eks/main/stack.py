@@ -16,7 +16,8 @@ common_tags = {
 }
 
 cluster_tags = {
-    f"kubernetes.io/cluster/{name_prefix}": "owned"
+    #f"kubernetes.io/cluster/{name_prefix}": "owned",
+    "aws:eks:cluster-name": f"{name_prefix}",
 }
 
 discovery_tags = {

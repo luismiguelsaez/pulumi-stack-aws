@@ -20,20 +20,24 @@ common_tags = {
     "pulumi:stack": env,
 }
 
+"""
+Stack references
+"""
+network = StackReference(f"{org}/network-{name_prefix}/{env}")
+eks = StackReference(f"{org}/eks-{name_prefix}/{env}")
+
+"""
+Set Karpenter node templates discovery tags
+"""
 cluster_tags = {
-    f"kubernetes.io/cluster/{name_prefix}": "owned",
+    #f"kubernetes.io/cluster/{eks.get_output('eks_cluster_name')}": "owned",
+    "aws:eks:cluster-name": f"{eks.get_output('eks_cluster_name')}",
 }
 
 discovery_tags = {
     "karpenter.sh/discovery": name_prefix,
     #"aws:eks:cluster-name": name_prefix,
 }
-
-"""
-Stack references
-"""
-network = StackReference(f"{org}/network-{name_prefix}/{env}")
-eks = StackReference(f"{org}/eks-{name_prefix}/{env}")
 
 """
 Create Kubernetes provider from EKS kubeconfig

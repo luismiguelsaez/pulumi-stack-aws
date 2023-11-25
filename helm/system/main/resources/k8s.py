@@ -5,7 +5,7 @@ from stack import k8s_provider
 from resources import iam
 from requests import get
 from tools import karpenter
-from stack import eks, cluster_tags, discovery_tags, k8s_provider, charts_config
+from stack import eks, k8s_provider, charts_config
 import yaml
 
 """
@@ -55,24 +55,30 @@ ConfigMapPatch(
 """
 Provision Karpenter AWSNodetemplates
 """
-if charts_config.require_bool("karpenter_enabled"):
-
-    public_ssh_key = get("https://github.com/luismiguelsaez.keys").text.strip()
-
-    from resources.helm import karpenter_helm_release
-
-    Output.all(
-        iam.karpenter_node_role_instance_profile.name
-    ).apply(lambda args:
-        karpenter.karpenter_templates(
-            name="karpenter-aws-node-templates",
-            provider=k8s_provider,
-            manifests_path="resources/nodetemplates",
-            ssh_public_key=public_ssh_key,
-            instance_profile=args[0],
-            sg_selector_tags=cluster_tags,
-            subnet_selector_tags=discovery_tags,
-            eks_cluster_security_group_id=eks.get_output("eks_cluster_security_group_id"),
-            depends_on=[karpenter_helm_release]
-        )
-    )
+#if charts_config.require_bool("karpenter_enabled"):
+#
+#    public_ssh_key = get("https://github.com/luismiguelsaez.keys").text.strip()
+#
+#    from resources.helm import karpenter_helm_release
+#
+#    Output.all(
+#        iam.karpenter_node_role_instance_profile.name
+#    ).apply(lambda args:
+#        karpenter.karpenter_templates(
+#            name="karpenter-aws-node-templates",
+#            provider=k8s_provider,
+#            manifests_path="resources/nodetemplates",
+#            ssh_public_key=public_ssh_key,
+#            instance_profile=args[0],
+#            eks_cluster_name=eks.get_output("eks_cluster_name"),
+#            #sg_selector_tags={
+#            #    #f"kubernetes.io/cluster/{eks.get_output('eks_cluster_name')}": "owned",
+#            #    "aws:eks:cluster-name": eks.get_output("eks_cluster_name"),
+#            #},
+#            #subnet_selector_tags={
+#            #    "karpenter.sh/discovery": eks.get_output("eks_cluster_name"),
+#            #},
+#            eks_cluster_security_group_id=eks.get_output("eks_cluster_security_group_id"),
+#            depends_on=[karpenter_helm_release]
+#        )
+#    )

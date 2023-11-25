@@ -267,34 +267,133 @@ if charts_config.require_bool("opensearch_enabled"):
 
 
 if charts_config.require_bool("argocd_enabled"):
-    helm_argocd_chart = releases.argocd(
-        version=charts_config.require("argocd_version"),
-        provider=k8s_provider,
+    # Minimal ArgoCD Helm chart for cluster bootstrapping
+    helm_argocd_chart = Release(
+        resource_name="argo-cd-helm-release",
         name="argo-cd",
+        repository_opts=RepositoryOptsArgs(
+            repo="https://argoproj.github.io/argo-helm",
+        ),
+        version=charts_config.require("argocd_version"),
+        chart="argo-cd",
         namespace=charts_config.require("argocd_namespace"),
-        depends_on=[karpenter_helm_release, helm_ingress_nginx_external_chart, ebs_csi_driver_release],
-        ingress_hostname=argocd_config.require("ingress_hostname"),
-        ingress_protocol=argocd_config.require("ingress_protocol"),
-        ingress_class_name=argocd_config.require("ingress_class_name"),
-        argocd_redis_ha_enabled=argocd_config.require_bool("redis_ha_enabled"),
-        argocd_redis_ha_storage_class=ebs_csi_driver_config.require("storage_class_name"),
-        argocd_redis_ha_storage_size=argocd_config.require("redis_ha_storage_size"),
-        argocd_redis_ha_haproxy_enabled=True,
-        argocd_application_controller_replicas=argocd_config.require_int("controller_replicas"),
-        argocd_applicationset_controller_replicas=argocd_config.require_int("applicationset_replicas"),
-        argocd_crds_keep=False,
-        argocd_plugins_enabled=True,
-        argocd_iam_role_arn=iam.argocd_role.arn,
-        karpenter_node_enabled=True,
-        karpenter_node_provider_name="bottlerocket-default",
-        karpenter_provisioner_controller_instance_category=["t"],
-        karpenter_provisioner_controller_instance_arch=["arm64"],
-        karpenter_provisioner_controller_instance_capacity_type=["spot"],
-        karpenter_provisioner_redis_instance_category=["t"],
-        karpenter_provisioner_redis_instance_arch=["arm64"],
-        karpenter_provisioner_redis_instance_capacity_type=["spot"],
-        controller_resources=argocd_config.require_object("controller_resources"),
-        repo_server_resources=argocd_config.require_object("repo_server_resources"),
+        create_namespace=True,
+        values={
+            "crds": {
+                "install": True,
+                "keep": False,
+                "annotations": {},
+                "additionalLabels": {},
+            },
+            "global": {
+                "additionalLabels": {
+                    "app": "argo-cd"
+                },
+            },
+            "configs": {
+                "cm": {
+                    "url": f"{argocd_config.require('ingress_protocol')}://{argocd_config.require('ingress_hostname')}",
+                    "exec.enabled": "true",
+                    "admin.enabled": "true",
+                    "timeout.reconciliation": "180s",
+                },
+            },
+            "server": {
+                "ingress": {
+                    "enabled": "true",
+                    "ingressClassName": argocd_config.require("ingress_class_name"),
+                    "hosts": [ argocd_config.require("ingress_hostname") ],
+                    "paths": [ "/" ],
+                    "pathType": "Prefix",
+                },
+            },
+            "repoServer": {
+                "serviceAccount": {
+                    "create": "true",
+                    "annotations": {
+                        "eks.amazonaws.com/role-arn": iam.argocd_role.arn,
+                        "automountServiceAccountToken": "true",
+                    },
+                },
+                # CMP BEGIN
+                "volumes": [
+                    {
+                        "name": "cmp-kustomize-aws-secretsmanager",
+                        "configMap": {
+                            "name": "cmp-kustomize-aws-secretsmanager"
+                        }
+                    },
+                    {
+                        "name": "cmp-tmp",
+                        "emptyDir": {}
+                    }
+                ],
+                "extraContainers": [
+                    {
+                        "name": "cmp-kustomize-aws-secretsmanager",
+                        "command": [
+                            "/var/run/argocd/argocd-cmp-server"
+                        ],
+                        "args": [
+                            "--loglevel",
+                            "debug",
+                            "--logformat",
+                            "json"
+                        ],
+                        "image": "luismiguelsaez/argocd-cmp-default:v0.0.2",
+                        "securityContext": {
+                            "runAsNonRoot": True,
+                            "runAsUser": 999,
+                            "runAsGroup": 999
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/run/argocd",
+                                "name": "var-files"
+                            },
+                            {
+                                "mountPath": "/home/argocd/cmp-server/plugins",
+                                "name": "plugins"
+                            },
+                            {
+                                "mountPath": "/home/argocd/cmp-server/config/plugin.yaml",
+                                "subPath": "plugin.yaml",
+                                "name": "cmp-kustomize-aws-secretsmanager"
+                            },
+                            {
+                                "mountPath": "/tmp",
+                                "name": "cmp-tmp"
+                            }
+                        ],
+                        "env": [
+                            {
+                                "name": "AVP_TYPE",
+                                "value": "awssecretsmanager"
+                            },
+                            {
+                                "name": "HOME",
+                                "value": "/tmp"
+                            }
+                        ]
+                    }
+                ],
+                ## CMP END
+            },
+            "extraObjects": [
+                # AWS Secrets Manager plugin, required for root Application bootstrap
+                {
+                    "apiVersion": "v1",
+                    "kind": "ConfigMap",
+                    "metadata": {
+                        "name": "cmp-kustomize-aws-secretsmanager"
+                    },
+                    "data": {
+                        "plugin.yaml": "apiVersion: argoproj.io/v1alpha1\nkind: ConfigManagementPlugin\nmetadata:\n  name: cmp-kustomize-aws-secretsmanager\nspec:\n  version: v1.0\n  init:\n    command: [sh, -c]\n    args:\n      - |\n        find . -type f -name kustomization.yaml\n  generate:\n    command: [sh, -c]\n    args:\n      - |\n        kustomize build . | argocd-vault-plugin generate --verbose-sensitive-output -\n  discover:\n    find:\n      glob: \"./**/kustomization.yaml\"\n"
+                    }
+                }
+            ],
+        },
+        opts=ResourceOptions(provider=k8s_provider, depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release])
     )
 
     if charts_config.require_bool("argocd_apps_enabled"):

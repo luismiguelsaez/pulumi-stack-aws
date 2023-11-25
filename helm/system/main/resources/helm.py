@@ -432,7 +432,7 @@ if charts_config.require_bool("argocd_enabled"):
                         },
                         "syncPolicy": {
                             "automated": {
-                                "prune": False,
+                                "prune": True,
                                 "selfHeal": True
                             },
                             "syncOptions": [

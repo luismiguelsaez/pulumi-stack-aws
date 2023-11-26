@@ -425,9 +425,6 @@ if charts_config.require_bool("argocd_enabled"):
                         "namespace": "argocd",
                         "additionalLabels": {},
                         "additionalAnnotations": {},
-                        "finalizers": [
-                            "resources-finalizer.argocd.argoproj.io"
-                        ],
                         "project": "default",
                         "source": {
                             "repoURL": "https://github.com/luismiguelsaez/gitops-argocd-self-managed",

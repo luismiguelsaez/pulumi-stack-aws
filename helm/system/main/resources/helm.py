@@ -9,7 +9,7 @@ Deploy Cluster Autoscaler Helm chart
 """
 if charts_config.require_bool("cluster_autoscaler_enabled"):
     cluster_autoscaler_helm_release = Release(
-        "cluster-autoscaler-helm-release",
+        "cluster-autoscaler",
         repository_opts=RepositoryOptsArgs(
             repo="https://kubernetes.github.io/autoscaler"
         ),
@@ -54,7 +54,7 @@ Deploy Karpenter Helm chart
 """
 if charts_config.require_bool("karpenter_enabled"):
     karpenter_helm_release = Release(
-        resource_name="karpenter-helm-release",
+        resource_name="karpenter",
         name="karpenter",
         chart="oci://public.ecr.aws/karpenter/karpenter",
         version=charts_config.require("karpenter_version"),
@@ -101,7 +101,7 @@ Deploy AWS Load Balancer Controller Helm chart
 """
 if charts_config.require_bool("aws_load_balancer_controller_enabled"):
     aws_load_balancer_controller_release = Release(
-        resource_name="aws-load-balancer-controller-helm-release",
+        resource_name="aws-load-balancer-controller",
         name="aws-load-balancer-controller",
         repository_opts=RepositoryOptsArgs(
             repo="https://aws.github.io/eks-charts",
@@ -133,7 +133,7 @@ Deploy AWS EBS CSI Driver Helm chart
 """
 if charts_config.require_bool("ebs_csi_driver_enabled"):
     ebs_csi_driver_release = Release(
-        resource_name="ebs-csi-driver-helm-release",
+        resource_name="ebs-csi-driver",
         name="aws-ebs-csi-driver",
         repository_opts=RepositoryOptsArgs(
             repo="https://kubernetes-sigs.github.io/aws-ebs-csi-driver",
@@ -183,7 +183,7 @@ Deploy External DNS Helm chart
 """
 if charts_config.require_bool("external_dns_enabled"):
     external_dns_release = Release(
-        resource_name="external-dns-helm-release",
+        resource_name="external-dns",
         name="external-dns",
         repository_opts=RepositoryOptsArgs(
             repo="https://kubernetes-sigs.github.io/external-dns",
@@ -269,7 +269,7 @@ if charts_config.require_bool("opensearch_enabled"):
 if charts_config.require_bool("argocd_enabled"):
     # Minimal ArgoCD Helm chart for cluster bootstrapping
     helm_argocd_chart = Release(
-        resource_name="argo-cd-helm-release",
+        resource_name="argo-cd",
         name="argo-cd",
         repository_opts=RepositoryOptsArgs(
             repo="https://argoproj.github.io/argo-helm",
@@ -399,7 +399,7 @@ if charts_config.require_bool("argocd_enabled"):
 
     if charts_config.require_bool("argocd_apps_enabled"):
         helm_argocd_apps_chart = Release(
-            resource_name="argocd-apps-helm-release",
+            resource_name="argocd-apps",
             name="argocd-apps",
             repository_opts=RepositoryOptsArgs(
                 repo="https://argoproj.github.io/argo-helm",

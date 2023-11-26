@@ -27,6 +27,7 @@ roles_system_secret = Secret(
     name=pulumi.Output.concat(secrets_root_path, "/iam/roles"),
     force_overwrite_replica_secret=True,
     recovery_window_in_days=0,
+    opts=pulumi.ResourceOptions(retain_on_delete=True),
 )
 
 roles_system = {
@@ -42,6 +43,7 @@ SecretVersion(
     resource_name=f"eks-cluster-iam-roles",
     secret_id=roles_system_secret.id,
     secret_string=pulumi.Output.json_dumps(roles_system),
+    opts=pulumi.ResourceOptions(retain_on_delete=True),
 )
 
 # Create cluster info secret
@@ -51,6 +53,7 @@ cluster_info_secret = Secret(
     name=pulumi.Output.concat(secrets_root_path, "/details"),
     force_overwrite_replica_secret=True,
     recovery_window_in_days=0,
+    opts=pulumi.ResourceOptions(retain_on_delete=True),
 )
 
 cluster_info = {
@@ -65,6 +68,7 @@ SecretVersion(
     resource_name=f"eks-cluster-info",
     secret_id=cluster_info_secret.id,
     secret_string=pulumi.Output.json_dumps(cluster_info),
+    opts=pulumi.ResourceOptions(retain_on_delete=True),
 )
 
 # Create ingress secret
@@ -74,6 +78,7 @@ ingress_secret = Secret(
     name=pulumi.Output.concat(secrets_root_path, "/ingress"),
     force_overwrite_replica_secret=True,
     recovery_window_in_days=0,
+    opts=pulumi.ResourceOptions(retain_on_delete=True),
 )
 
 ingress = {
@@ -87,4 +92,5 @@ SecretVersion(
     resource_name=f"eks-cluster-ingress",
     secret_id=ingress_secret.id,
     secret_string=pulumi.Output.json_dumps(ingress),
+    opts=pulumi.ResourceOptions(retain_on_delete=True),
 )

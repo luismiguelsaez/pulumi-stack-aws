@@ -16,7 +16,7 @@ param_eks_cluster_endpoint = eks.get_output('eks_cluster_endpoint')
 param_eks_cluster_region = aws_config.require("region")
 param_eks_cluster_security_group = get_cluster(name=param_eks_cluster_name).vpc_config.cluster_security_group_id
 
-secrets_root_path = pulumi.Output.concat("/eks/cluster/", param_eks_cluster_name, "/secrets")
+secrets_root_path = pulumi.Output.concat("/eks/cluster/20231126/", param_eks_cluster_name)
 
 public_ssh_key = get("https://github.com/luismiguelsaez.keys").text.strip()
 

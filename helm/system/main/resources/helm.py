@@ -1,3 +1,4 @@
+import time
 from pulumi import ResourceOptions, Output
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
 from resources import iam
@@ -278,6 +279,10 @@ if charts_config.require_bool("argocd_enabled"):
         chart="argo-cd",
         namespace=charts_config.require("argocd_namespace"),
         create_namespace=True,
+        force_update=True,
+        max_history=4,
+        skip_await=False,
+        timeout=300,
         values={
             "crds": {
                 "install": True,
@@ -297,6 +302,10 @@ if charts_config.require_bool("argocd_enabled"):
                     "admin.enabled": "true",
                     "timeout.reconciliation": "180s",
                     "resource.customizations": "argoproj.io/Application:\n  health.lua: |\n    hs = {}\n    hs.status = \"Progressing\"\n    hs.message = \"\"\n    if obj.status ~= nil then\n      if obj.status.health ~= nil then\n        hs.status = obj.status.health.status\n        if obj.status.health.message ~= nil then\n          hs.message = obj.status.health.message\n        end\n      end\n    end\n    return hs\n",
+                },
+                "params": {
+                    "server.insecure": "true",
+                    "server.disable.auth": "false",
                 },
             },
             "server": {
@@ -394,7 +403,7 @@ if charts_config.require_bool("argocd_enabled"):
                 }
             ],
         },
-        opts=ResourceOptions(provider=k8s_provider, depends_on=[karpenter_helm_release, cluster_autoscaler_helm_release])
+        opts=ResourceOptions(provider=k8s_provider, depends_on=[])
     )
 
     if charts_config.require_bool("argocd_apps_enabled"):

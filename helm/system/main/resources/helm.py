@@ -1,7 +1,6 @@
-import time
 from pulumi import ResourceOptions, Output
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
-from resources import iam
+from resources import iam, secrets
 from stack import aws_config, charts_config, ebs_csi_driver_config, ingress_config, opensearch_config, argocd_config, network, eks, k8s_provider, name_prefix
 from python_pulumi_helm import releases
 
@@ -281,7 +280,7 @@ if charts_config.require_bool("argocd_enabled"):
         create_namespace=True,
         force_update=True,
         max_history=4,
-        skip_await=False,
+        skip_await=True,
         timeout=300,
         values={
             "crds": {
@@ -311,7 +310,7 @@ if charts_config.require_bool("argocd_enabled"):
             "server": {
                 "ingress": {
                     "enabled": "true",
-                    "ingressClassName": argocd_config.require("ingress_class_name"),
+                    "ingressClassName": "", #argocd_config.require("ingress_class_name"),
                     "hosts": [ argocd_config.require("ingress_hostname") ],
                     "paths": [ "/" ],
                     "pathType": "Prefix",
@@ -403,61 +402,65 @@ if charts_config.require_bool("argocd_enabled"):
                 }
             ],
         },
-        opts=ResourceOptions(provider=k8s_provider, depends_on=[])
+        opts=ResourceOptions(provider=k8s_provider, depends_on=[secrets.cluster_info_secret, secrets.roles_system_secret, secrets.ingress_secret])
     )
 
-    if charts_config.require_bool("argocd_apps_enabled"):
-        helm_argocd_apps_chart = Release(
-            resource_name="argocd-apps",
-            name="argocd-apps",
-            repository_opts=RepositoryOptsArgs(
-                repo="https://argoproj.github.io/argo-helm",
-            ),
-            version=charts_config.require("argocd_apps_version"),
-            chart="argocd-apps",
-            namespace=charts_config.require("argocd_apps_namespace"),
-            create_namespace=True,
-            opts=ResourceOptions(provider=k8s_provider, depends_on=[helm_argocd_chart]),
-            values={
-                "applications": [
-                    {
-                        "name": "root",
-                        "namespace": "argocd",
-                        "additionalLabels": {},
-                        "additionalAnnotations": {},
-                        "project": "default",
-                        "source": {
-                            "repoURL": "https://github.com/luismiguelsaez/gitops-argocd-self-managed",
-                            "targetRevision": "HEAD",
-                            "path": ".",
-                            "plugin": {}, # Uses plugin auto-discovery
-                        },
-                        "destination": {
-                            "server": "https://kubernetes.default.svc",
-                            "namespace": "argocd"
-                        },
-                        "syncPolicy": {
-                            "automated": {
-                                "prune": True,
-                                "selfHeal": True
-                            },
-                            "syncOptions": [
-                                "Validate=true",
-                                "CreateNamespace=true",
-                                "RespectIgnoreDifferences=true",
-                            ],
-                            "retry": {
-                                "limit": 10,
-                                "backoff": {
-                                    "duration": "5s",
-                                    "factor": 2,
-                                    "maxDuration": "2m"
-                                }
-                            }
-                        },
-                        "revisionHistoryLimit": 10,
-                        "ignoreDifferences": [],
+if charts_config.require_bool("argocd_apps_enabled"):
+    helm_argocd_apps_chart = Release(
+        resource_name="argocd-apps",
+        name="argocd-apps",
+        repository_opts=RepositoryOptsArgs(
+            repo="https://argoproj.github.io/argo-helm",
+        ),
+        version=charts_config.require("argocd_apps_version"),
+        chart="argocd-apps",
+        namespace=charts_config.require("argocd_apps_namespace"),
+        create_namespace=True,
+        force_update=True,
+        max_history=4,
+        skip_await=True,
+        timeout=300,
+        opts=ResourceOptions(provider=k8s_provider, depends_on=[helm_argocd_chart]),
+        values={
+            "applications": [
+                {
+                    "name": "root",
+                    "namespace": "argocd",
+                    "additionalLabels": {},
+                    "additionalAnnotations": {},
+                    "project": "default",
+                    "source": {
+                        "repoURL": "https://github.com/luismiguelsaez/gitops-argocd-self-managed",
+                        "targetRevision": "HEAD",
+                        "path": ".",
+                        "plugin": {}, # Uses plugin auto-discovery
                     },
-                ],
-            }
-        )
+                    "destination": {
+                        "server": "https://kubernetes.default.svc",
+                        "namespace": "argocd"
+                    },
+                    "syncPolicy": {
+                        "automated": {
+                            "prune": True,
+                            "selfHeal": True
+                        },
+                        "syncOptions": [
+                            "Validate=true",
+                            "CreateNamespace=true",
+                            "RespectIgnoreDifferences=true",
+                        ],
+                        "retry": {
+                            "limit": 10,
+                            "backoff": {
+                                "duration": "5s",
+                                "factor": 2,
+                                "maxDuration": "2m"
+                            }
+                        }
+                    },
+                    "revisionHistoryLimit": 10,
+                    "ignoreDifferences": [],
+                },
+            ],
+        }
+    )

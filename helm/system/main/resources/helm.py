@@ -1,7 +1,7 @@
 from pulumi import ResourceOptions, Output
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
 from resources import iam, secrets
-from stack import aws_config, charts_config, ebs_csi_driver_config, ingress_config, opensearch_config, argocd_config, network, eks, k8s_provider, name_prefix
+from stack import env, aws_config, charts_config, ebs_csi_driver_config, ingress_config, opensearch_config, argocd_config, network, eks, k8s_provider, name_prefix
 from python_pulumi_helm import releases
 
 """
@@ -405,7 +405,7 @@ if charts_config.require_bool("argocd_enabled"):
         opts=ResourceOptions(provider=k8s_provider, depends_on=[secrets.cluster_info_secret, secrets.roles_system_secret, secrets.ingress_secret])
     )
 
-cluster_gitops_path = "base"
+cluster_gitops_path = Output.concat("clusters/", env, "/", eks.get_output("eks_cluster_name"))
 
 if charts_config.require_bool("argocd_apps_enabled"):
     helm_argocd_apps_chart = Release(

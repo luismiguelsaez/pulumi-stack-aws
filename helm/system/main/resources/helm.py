@@ -405,6 +405,8 @@ if charts_config.require_bool("argocd_enabled"):
         opts=ResourceOptions(provider=k8s_provider, depends_on=[secrets.cluster_info_secret, secrets.roles_system_secret, secrets.ingress_secret])
     )
 
+cluster_gitops_path = "base"
+
 if charts_config.require_bool("argocd_apps_enabled"):
     helm_argocd_apps_chart = Release(
         resource_name="argocd-apps",
@@ -432,7 +434,7 @@ if charts_config.require_bool("argocd_apps_enabled"):
                     "source": {
                         "repoURL": "https://github.com/luismiguelsaez/gitops-argocd-self-managed",
                         "targetRevision": "HEAD",
-                        "path": ".",
+                        "path": cluster_gitops_path,
                         "plugin": {}, # Uses plugin auto-discovery
                     },
                     "destination": {

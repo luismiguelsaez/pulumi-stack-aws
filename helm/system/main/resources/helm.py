@@ -280,7 +280,7 @@ if charts_config.require_bool("argocd_enabled"):
         create_namespace=True,
         force_update=True,
         max_history=4,
-        skip_await=True,
+        skip_await=False,
         timeout=300,
         values={
             "crds": {
@@ -420,8 +420,8 @@ if charts_config.require_bool("argocd_apps_enabled"):
         create_namespace=True,
         force_update=True,
         max_history=4,
-        skip_await=True,
-        timeout=300,
+        skip_await=False,
+        timeout=60,
         opts=ResourceOptions(provider=k8s_provider, depends_on=[helm_argocd_chart]),
         values={
             "applications": [

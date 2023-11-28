@@ -282,6 +282,14 @@ if charts_config.require_bool("argocd_enabled"):
         max_history=4,
         skip_await=False,
         timeout=300,
+        opts=ResourceOptions(
+            provider=k8s_provider,
+            depends_on=[
+                secrets.cluster_info_secret_version,
+                secrets.roles_system_secret_version,
+                secrets.ingress_secret_version,
+            ]
+        ),
         values={
             "crds": {
                 "install": True,
@@ -402,7 +410,6 @@ if charts_config.require_bool("argocd_enabled"):
                 }
             ],
         },
-        opts=ResourceOptions(provider=k8s_provider, depends_on=[secrets.cluster_info_secret, secrets.roles_system_secret, secrets.ingress_secret])
     )
 
 cluster_gitops_path = Output.concat("clusters/", env, "/", eks.get_output("eks_cluster_name"))

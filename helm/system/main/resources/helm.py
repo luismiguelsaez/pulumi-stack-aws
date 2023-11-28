@@ -421,7 +421,7 @@ if charts_config.require_bool("argocd_apps_enabled"):
         force_update=True,
         max_history=4,
         skip_await=False,
-        timeout=60,
+        timeout=900,
         opts=ResourceOptions(provider=k8s_provider, depends_on=[helm_argocd_chart]),
         values={
             "applications": [

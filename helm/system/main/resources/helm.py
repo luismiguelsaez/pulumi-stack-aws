@@ -284,11 +284,7 @@ if charts_config.require_bool("argocd_enabled"):
         timeout=300,
         opts=ResourceOptions(
             provider=k8s_provider,
-            depends_on=[
-                secrets.cluster_info_secret_version,
-                secrets.roles_system_secret_version,
-                secrets.ingress_secret_version,
-            ]
+            depends_on=secrets.secrets
         ),
         values={
             "crds": {

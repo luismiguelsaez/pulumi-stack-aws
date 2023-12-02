@@ -33,7 +33,7 @@ secrets_data = {
             'argocd': iam.argocd_role.arn,
         },
     },
-    'cluster-info': {
+    'info': {
         'path': pulumi.Output.concat(secrets_root_path, "/details"),
         'values': {
             'name': param_eks_cluster_name,
@@ -43,7 +43,7 @@ secrets_data = {
             'ssh_public_key': public_ssh_key,
         },
     },
-    'cluster-ingress': {
+    'ingress': {
         'path': pulumi.Output.concat(secrets_root_path, "/ingress"),
         'values': {
             'external_domain': ingress_config.require("external_domain"),
@@ -55,30 +55,30 @@ secrets_data = {
 }
 
 secrets = []
-for idx in range(len(secrets_data)):
-
-    if not get_secret(name=secrets_data['path']):
+for secret in secrets_data:
+    id = ''
+    if not get_secret(name=secrets_data[secret]['path']):
 
         secrets.append(
             Secret(
-                resource_name=f"eks-cluster-{secrets_data[idx]}",
-                name=pulumi.Output.concat(secrets_root_path, "/iam/roles"),
+                resource_name=f"eks-cluster-{secret}",
+                name=secrets_data[secret]['path'],
                 force_overwrite_replica_secret=True,
                 recovery_window_in_days=0,
                 opts=pulumi.ResourceOptions(retain_on_delete=True),
             )
         )
 
-        id = secrets[idx].id
+        id = secrets[secret].id
 
     else:
 
-        id = get_secret(name=secrets_data['path']).id
+        id = get_secret(name=secrets_data[secret]['path']).id
 
     roles_system_secret_version = SecretVersion(
-        resource_name=f"eks-cluster-{secrets_data[idx]}",
+        resource_name=f"eks-cluster-{secret}",
         secret_id=id,
-        secret_string=pulumi.Output.json_dumps(secrets_data[idx]['values']),
+        secret_string=pulumi.Output.json_dumps(secrets_data[secret]['values']),
         opts=pulumi.ResourceOptions(retain_on_delete=True),
     )
 

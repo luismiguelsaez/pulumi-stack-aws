@@ -74,10 +74,18 @@ eks_nodegroup_system = eks.NodeGroup(
 """
 Addons setup
 """
+
+eks_addon_coredns_version = eks.get_addon_version(
+    addon_name="coredns",
+    kubernetes_version=eks_version,
+    most_recent=True
+)
+
 eks_addon_coredns = eks.Addon(
     resource_name=f"{name_prefix}-coredns",
     cluster_name=eks_cluster.name,
     addon_name="coredns",
+    addon_version=eks_addon_coredns_version.version,
     resolve_conflicts_on_create="OVERWRITE",
     resolve_conflicts_on_update="OVERWRITE",
     configuration_values=json.dumps(
@@ -97,6 +105,26 @@ eks_addon_coredns = eks.Addon(
     ),
     tags={
         "Name": f"{name_prefix}-coredns",
+    } | common_tags,
+    opts=ResourceOptions(depends_on=[eks_nodegroup_system])
+)
+
+eks_addon_kube_proxy_version = eks.get_addon_version(
+    addon_name="kube-proxy",
+    kubernetes_version=eks_version,
+    most_recent=True
+)
+
+eks_addon_kube_proxy = eks.Addon(
+    resource_name=f"{name_prefix}-kube-proxy",
+    cluster_name=eks_cluster.name,
+    addon_name="kube-proxy",
+    addon_version=eks_addon_kube_proxy_version.version,
+    resolve_conflicts_on_create="OVERWRITE",
+    resolve_conflicts_on_update="OVERWRITE",
+    configuration_values=json.dumps({}),
+    tags={
+        "Name": f"{name_prefix}-kube-proxy",
     } | common_tags,
     opts=ResourceOptions(depends_on=[eks_nodegroup_system])
 )

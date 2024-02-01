@@ -1,7 +1,7 @@
 from pulumi_aws.secretsmanager import Secret, SecretVersion, get_secret
 import pulumi
 from resources import iam
-from stack import eks, aws_config, ingress_config
+from stack import eks, aws_config, ingress_config, monitoring_config
 from requests import get
 from pulumi_aws.eks import get_cluster
 
@@ -51,14 +51,23 @@ secrets_data = {
             'internal_domain': ingress_config.require("internal_domain"),
             'internal_ssl_cert_arns': ingress_config.require("internal_ssl_cert_arns"),
         },
-    }
+    },
+    'monitoring': {
+        'path': pulumi.Output.concat(secrets_root_path, "/monitoring"),
+        'values': {
+            'pixie_deploy_key': monitoring_config.require("pixie_deploy_key"),
+        },
+    },
 }
 
 secrets = []
 for secret in secrets_data:
     id = ''
-    if not get_secret(name=secrets_data[secret]['path']):
-
+    
+    try:
+        get_secret(name=secrets_data[secret]['path'])
+        id = get_secret(name=secrets_data[secret]['path']).id
+    except:
         secrets.append(
             Secret(
                 resource_name=f"eks-cluster-{secret}",
@@ -69,11 +78,25 @@ for secret in secrets_data:
             )
         )
 
-        id = secrets[secret].id
+        id = secrets[-1].id
 
-    else:
-
-        id = get_secret(name=secrets_data[secret]['path']).id
+    #if not get_secret(name=secrets_data[secret]['path']):
+#
+    #    secrets.append(
+    #        Secret(
+    #            resource_name=f"eks-cluster-{secret}",
+    #            name=secrets_data[secret]['path'],
+    #            force_overwrite_replica_secret=True,
+    #            recovery_window_in_days=0,
+    #            opts=pulumi.ResourceOptions(retain_on_delete=True),
+    #        )
+    #    )
+#
+    #    id = secrets[secret].id
+#
+    #else:
+#
+    #    id = get_secret(name=secrets_data[secret]['path']).id
 
     roles_system_secret_version = SecretVersion(
         resource_name=f"eks-cluster-{secret}",

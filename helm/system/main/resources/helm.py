@@ -403,6 +403,16 @@ if charts_config.require_bool("argocd_enabled"):
                     "data": {
                         "plugin.yaml": "apiVersion: argoproj.io/v1alpha1\nkind: ConfigManagementPlugin\nmetadata:\n  name: cmp-kustomize-aws-secretsmanager\nspec:\n  version: v1.0\n  init:\n    command: [sh, -c]\n    args:\n      - |\n        find . -type f -name kustomization.yaml\n  generate:\n    command: [sh, -c]\n    args:\n      - |\n        kustomize build . | argocd-vault-plugin generate --verbose-sensitive-output -\n  discover:\n    find:\n      glob: \"./**/kustomization.yaml\"\n"
                     }
+                },
+                {
+                    "apiVersion": "v1",
+                    "kind": "ConfigMap",
+                    "metadata": {
+                        "name": "cmp-helm-aws-secretsmanager"
+                    },
+                    "data": {
+                        "plugin.yaml": "apiVersion: argoproj.io/v1alpha1\nkind: ConfigManagementPlugin\nmetadata:\n  name: cmp-helm-aws-secretsmanager\nspec:\n  version: v1.0\n  init:\n    command: [/bin/bash, -c]\n    args:\n      - |\n        # Create Helm config directory\n        mkdir -p ./.helm/config\n        mkdir -p ./.helm/cache\n        export HELM_CONFIG_HOME=./.helm/config\n        export XDG_CACHE_HOME=./.helm/cache\n        # Add Helm repos\n        helm_repos=$(helm dependencies list | awk 'NR > 1 && $0 != \"\" && $3 != \"unpacked\" {print $3}' | sort | uniq);\n        for repo in $helm_repos; do [ -n \"$repo\" ] && helm repo add $RANDOM $repo;done\n        # Fix for OCI charts\n        [ -f Chart.lock ] && rm Chart.lock\n        # Build Helm dependencies\n        helm dependency build --skip-refresh\n  generate:\n    command: [/bin/bash, -c]\n    args:\n      - |\n        export HELM_CONFIG_HOME=./.helm/config\n        export XDG_CACHE_HOME=./.helm/cache\n        export HELM_INCLUDE_CRDS=\"--include-crds\";\n        export HELM_EXTRA_PARAMS=\"\";\n        if [ -n \"$ARGOCD_ENV_HELM_SKIP_CRDS\" ]; then\n          export HELM_INCLUDE_CRDS=\"\";\n        fi;\n        if [ -n \"$ARGOCD_ENV_HELM_EXTRA_PARAMS\" ]; then\n          export HELM_EXTRA_PARAMS=\"$ARGOCD_ENV_HELM_EXTRA_PARAMS\";\n        fi;\n        echo \"$ARGOCD_ENV_HELM_VALUES\" > values-env.yaml;\n        echo \"$ARGOCD_ENV_HELM_VALUES_OVERRIDE\" > values-env-override.yaml;\n        helm template $ARGOCD_APP_NAME $HELM_INCLUDE_CRDS $HELM_EXTRA_PARAMS -n $ARGOCD_APP_NAMESPACE -f values-env.yaml -f values-env-override.yaml . |\\\n        argocd-vault-plugin generate - --verbose-sensitive-output\n  discover:\n    find:\n      glob: \"./**/Chart.yaml\"\n"
+                    }
                 }
             ],
         },

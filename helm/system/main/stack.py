@@ -8,6 +8,7 @@ opensearch_config = Config("opensearch")
 ebs_csi_driver_config = Config("ebs_csi_driver")
 argocd_config = Config("argocd")
 ingress_config = Config("ingress")
+monitoring_config = Config("monitoring")
 
 org = Config().require("org")
 project = get_project()

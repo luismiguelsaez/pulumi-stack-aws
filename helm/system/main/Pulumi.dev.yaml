@@ -24,3 +24,5 @@ config:
   argocd:ingress_class_name: "nginx-external"
   argocd:redis_ha_enabled: False
   argocd:redis_ha_storage_size: "10Gi"
+
+  monitoring:pixie_deploy_key: "px-dep-f866efaa-d64f-425e-8bb0-13b87b213cd1"

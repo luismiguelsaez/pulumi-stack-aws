@@ -337,6 +337,12 @@ if charts_config.require_bool("argocd_enabled"):
                         }
                     },
                     {
+                        "name": "cmp-helm-aws-secretsmanager",
+                        "configMap": {
+                            "name": "cmp-helm-aws-secretsmanager"
+                        }
+                    },
+                    {
                         "name": "cmp-tmp",
                         "emptyDir": {}
                     }
@@ -353,7 +359,7 @@ if charts_config.require_bool("argocd_enabled"):
                             "--logformat",
                             "json"
                         ],
-                        "image": "luismiguelsaez/argocd-cmp-default:v0.0.2",
+                        "image": "luismiguelsaez/argocd-cmp-default:v0.0.3",
                         "securityContext": {
                             "runAsNonRoot": True,
                             "runAsUser": 999,
@@ -388,7 +394,66 @@ if charts_config.require_bool("argocd_enabled"):
                                 "value": "/tmp"
                             }
                         ]
+                    },
+                    {
+                        "name": "cmp-helm-aws-secretsmanager",
+                        "command": [
+                            "/var/run/argocd/argocd-cmp-server"
+                        ],
+                        "args": [
+                            "--loglevel",
+                            "debug",
+                            "--logformat",
+                            "json"
+                        ],
+                        "image": "luismiguelsaez/argocd-cmp-default:v0.0.3",
+                        "securityContext": {
+                            "runAsNonRoot": True,
+                            "runAsUser": 999,
+                            "runAsGroup": 999
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/var/run/argocd",
+                                "name": "var-files"
+                            },
+                            {
+                                "mountPath": "/home/argocd/cmp-server/plugins",
+                                "name": "plugins"
+                            },
+                            {
+                                "mountPath": "/home/argocd/cmp-server/config/plugin.yaml",
+                                "subPath": "plugin.yaml",
+                                "name": "cmp-helm-aws-secretsmanager"
+                            },
+                            {
+                                "mountPath": "/tmp",
+                                "name": "cmp-tmp"
+                            }
+                            ],
+                            "env": [
+                            {
+                                "name": "AVP_TYPE",
+                                "value": "awssecretsmanager"
+                            },
+                            {
+                                "name": "HOME",
+                                "value": "/tmp"
+                            }
+                        ],
+                        "env": [
+                            {
+                                "name": "AVP_TYPE",
+                                "value": "awssecretsmanager"
+                            },
+                            {
+                                "name": "HOME",
+                                "value": "/tmp"
+                            }
+                        ]
                     }
+
+
                 ],
                 ## CMP END
             },

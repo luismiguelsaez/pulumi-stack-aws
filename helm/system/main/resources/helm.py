@@ -430,16 +430,6 @@ if charts_config.require_bool("argocd_enabled"):
                                 "mountPath": "/tmp",
                                 "name": "cmp-tmp"
                             }
-                            ],
-                            "env": [
-                            {
-                                "name": "AVP_TYPE",
-                                "value": "awssecretsmanager"
-                            },
-                            {
-                                "name": "HOME",
-                                "value": "/tmp"
-                            }
                         ],
                         "env": [
                             {

@@ -13,6 +13,7 @@ Secrets are retrieved later during ArgoCD bootstrap using `argocd-vault-plugin` 
 # Get EKS cluster info
 param_eks_cluster_name = eks.get_output('eks_cluster_name')
 param_eks_cluster_endpoint = eks.get_output('eks_cluster_endpoint')
+param_eks_cluster_ca_data = eks.get_output('eks_cluster_ca_data')
 param_eks_cluster_region = aws_config.require("region")
 param_eks_cluster_security_group = get_cluster(name=param_eks_cluster_name).vpc_config.cluster_security_group_id
 
@@ -38,6 +39,7 @@ secrets_data = {
         'values': {
             'name': param_eks_cluster_name,
             'endpoint': param_eks_cluster_endpoint,
+            'ca_data': param_eks_cluster_ca_data,
             'region': param_eks_cluster_region,
             'security_group': param_eks_cluster_security_group,
             'ssh_public_key': public_ssh_key,

@@ -1,4 +1,4 @@
-from resources import elb
+from resources import elb, iam
 from stack import network, name_prefix, env
 from pulumi_aws import ecs
 import json
@@ -42,6 +42,7 @@ ecs_cluster_service_test_task_definition_nginx = ecs.TaskDefinition(
     memory="512",
     network_mode="awsvpc",
     family=f"ecs-cluster-{name_prefix}-test-nginx",
+    task_role_arn=iam.iam_role_task_execution.arn,
     container_definitions=json.dumps([
         {
             "name": "nginx",

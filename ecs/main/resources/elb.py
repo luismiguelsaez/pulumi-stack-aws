@@ -45,7 +45,7 @@ ecs_elb = LoadBalancer(
     subnets=network.get_output("subnets_public"),
     enable_cross_zone_load_balancing=True,
     security_groups=[
-        ecs_elb_security_group.name,
+        ecs_elb_security_group.id,
     ],
     tags={
         "Name": f'ecs-cluster-{name_prefix}',
@@ -75,6 +75,7 @@ ecs_elb_target_group_test = TargetGroup(
     port=80,
     protocol="HTTP",
     vpc_id=network.get_output("vpc_id"),
+    target_type="ip",
     tags={
         "Name": f'ecs-cluster-{name_prefix}-test',
     },

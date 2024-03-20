@@ -66,12 +66,19 @@ ecs_cluster_service_test = ecs.Service(
     resource_name=f"ecs-cluster-{name_prefix}-test",
     name=f"ecs-cluster-{name_prefix}-test",
     cluster=ecs_cluster.name,
+    network_configuration=ecs.ServiceNetworkConfigurationArgs(
+        assign_public_ip=False,
+        subnets=network.get_output("subnets_private"),
+        security_groups=[
+            elb.ecs_elb_security_group.id,
+        ],
+    ),
     desired_count=1,
     task_definition=ecs_cluster_service_test_task_definition_nginx.arn,
     load_balancers=[
         ecs.ServiceLoadBalancerArgs(
             target_group_arn=elb.ecs_elb_target_group_test.arn,
-            container_name="test",
+            container_name="nginx",
             container_port=80,
         )
     ],

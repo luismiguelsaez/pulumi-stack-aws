@@ -90,6 +90,7 @@ karpenter_policy = Policy(
                         "ec2:DescribeSpotPriceHistory",
                         "ec2:DescribeSubnets",
                         "ec2:RunInstances",
+                        "ec2:TerminateInstances",
                         "iam:PassRole",
                         "pricing:GetProducts",
                         "ssm:GetParameter"

@@ -1,11 +1,11 @@
 from pulumi import Output
-from pulumi_aws import iam
+from pulumi_aws import iam, get_caller_identity
 from stack import name_prefix, aws_config
 
 current = get_caller_identity()
 
 iam_policy_secrets_manager = iam.Policy(
-    resource_name='ecs-cluster-{name_prefix}-secrets-manager',
+    resource_name=f'ecs-cluster-{name_prefix}-secrets-manager',
     name="secrets-manager",
     policy=Output.json_dumps(
         {
@@ -34,7 +34,7 @@ iam_policy_secrets_manager = iam.Policy(
 )
 
 iam_role_task_execution = iam.Role(
-    resource_name='ecs-cluster-{name_prefix}-task-execution',
+    resource_name=f'ecs-cluster-{name_prefix}-task-execution',
     name="task-execution",
     assume_role_policy=Output.json_dumps(
         {
@@ -53,7 +53,7 @@ iam_role_task_execution = iam.Role(
 )
 
 iam_role_policy_attachment_secrets_manager = iam.RolePolicyAttachment(
-    resource_name='ecs-cluster-{name_prefix}-task-execution-secrets-manager',
+    resource_name=f'ecs-cluster-{name_prefix}-task-execution-secrets-manager',
     role=iam_role_task_execution.name,
     policy_arn=iam_policy_secrets_manager.arn,
 )

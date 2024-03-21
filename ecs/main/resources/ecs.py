@@ -36,20 +36,26 @@ ecs_cluster_capacity_providers = ecs.ClusterCapacityProviders(
     ],
 )
 
-ecs_cluster_service_test_task_definition_nginx = ecs.TaskDefinition(
-    resource_name=f"ecs-cluster-{name_prefix}-test-nginx",
+ecs_cluster_service_test_task_definition_echo_server = ecs.TaskDefinition(
+    resource_name=f"ecs-cluster-{name_prefix}-test-echo-server",
     cpu="256",
     memory="512",
     network_mode="awsvpc",
-    family=f"ecs-cluster-{name_prefix}-test-nginx",
+    family=f"ecs-cluster-{name_prefix}-test-echo-server",
     task_role_arn=iam.iam_role_task_execution.arn,
     container_definitions=json.dumps([
         {
-            "name": "nginx",
-            "image": "nginx:1.25.3-alpine",
+            "name": "echo-server",
+            "image": "ealen/echo-server:0.9.2",
             "cpu": 10,
             "memory": 256,
             "essential": True,
+            "environment": [
+                {
+                    "name": "ENABLE_ENVIRONMENT",
+                    "value": "true",
+                },
+            ],
             "portMappings": [
                 {
                     "containerPort": 80,
@@ -75,11 +81,11 @@ ecs_cluster_service_test = ecs.Service(
         ],
     ),
     desired_count=1,
-    task_definition=ecs_cluster_service_test_task_definition_nginx.arn,
+    task_definition=ecs_cluster_service_test_task_definition_echo_server.arn,
     load_balancers=[
         ecs.ServiceLoadBalancerArgs(
             target_group_arn=elb.ecs_elb_target_group_test.arn,
-            container_name="nginx",
+            container_name="echo-server",
             container_port=80,
         )
     ],

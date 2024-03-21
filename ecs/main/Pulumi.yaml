@@ -11,3 +11,4 @@ config:
   aws:region: eu-central-1
 
   ecs:name_prefix: main
+  ecs:networking_mode: awsvpc

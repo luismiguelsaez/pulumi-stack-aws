@@ -1,4 +1,4 @@
-from stack import network, name_prefix
+from stack import network, name_prefix, networking_mode
 from pulumi_aws.alb import LoadBalancer, Listener, TargetGroup, ListenerRule, ListenerRuleActionArgs, ListenerDefaultActionArgs, ListenerDefaultActionFixedResponseArgs, ListenerRuleConditionArgs, ListenerRuleConditionHttpHeaderArgs
 from pulumi_aws.ec2 import SecurityGroup, SecurityGroupEgressArgs, SecurityGroupIngressArgs
 
@@ -75,7 +75,7 @@ ecs_elb_target_group_test = TargetGroup(
     port=80,
     protocol="HTTP",
     vpc_id=network.get_output("vpc_id"),
-    target_type="ip",
+    target_type="ip" if networking_mode == "awsvpc" else "instance",
     tags={
         "Name": f'ecs-cluster-{name_prefix}-test',
     },

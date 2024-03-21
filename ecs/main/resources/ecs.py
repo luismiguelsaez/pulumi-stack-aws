@@ -1,5 +1,5 @@
 from resources import elb, iam
-from stack import network, name_prefix, env
+from stack import network, name_prefix, networking_mode, env
 from pulumi_aws import ecs
 import json
 
@@ -40,7 +40,7 @@ ecs_cluster_service_test_task_definition_echo_server = ecs.TaskDefinition(
     resource_name=f"ecs-cluster-{name_prefix}-test-echo-server",
     cpu="256",
     memory="512",
-    network_mode="awsvpc",
+    network_mode=networking_mode,
     family=f"ecs-cluster-{name_prefix}-test-echo-server",
     task_role_arn=iam.iam_role_task_execution.arn,
     container_definitions=json.dumps([

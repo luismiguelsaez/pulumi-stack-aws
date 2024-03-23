@@ -1,2 +1,5 @@
 config:
   aws:profile: dev
+
+  elb:ssl_enabled: True
+  elb:ssl_certificate_arn: "arn:aws:acm:eu-central-1:484308071187:certificate/aca221b6-0f15-4d58-b1f3-fd27fc14c67a"

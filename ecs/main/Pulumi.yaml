@@ -12,3 +12,7 @@ config:
 
   ecs:name_prefix: main
   ecs:networking_mode: awsvpc
+
+  elb:ssl_enabled: False
+  elb:ssl_policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+  elb:ssl_certificate_arn: ""

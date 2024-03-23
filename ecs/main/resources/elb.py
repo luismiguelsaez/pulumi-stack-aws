@@ -1,6 +1,9 @@
 from stack import network, name_prefix, networking_mode
+from pulumi import Config
 from pulumi_aws.alb import LoadBalancer, Listener, TargetGroup, ListenerRule, ListenerRuleActionArgs, ListenerDefaultActionArgs, ListenerDefaultActionFixedResponseArgs, ListenerRuleConditionArgs, ListenerRuleConditionHttpHeaderArgs
 from pulumi_aws.ec2 import SecurityGroup, SecurityGroupEgressArgs, SecurityGroupIngressArgs
+
+elb_config = Config("elb")
 
 ecs_elb_security_group = SecurityGroup(
     f"ecs-cluster-{name_prefix}-elb",
@@ -55,8 +58,10 @@ ecs_elb = LoadBalancer(
 ecs_elb_listener_http = Listener(
     resource_name=f'ecs-cluster-{name_prefix}-http',
     load_balancer_arn=ecs_elb.arn,
-    port=80,
-    protocol="HTTP",
+    port=443 if elb_config.get_bool("ssl_enabled") else 80,
+    protocol="HTTPS" if elb_config.get_bool("ssl_enabled") else "HTTP",
+    certificate_arn=elb_config.get("ssl_certificate_arn") if elb_config.get_bool("ssl_enabled") else None,
+    ssl_policy=elb_config.get("ssl_policy") if elb_config.get_bool("ssl_enabled") else None,
     default_actions=[
         ListenerDefaultActionArgs(
             type="fixed-response",

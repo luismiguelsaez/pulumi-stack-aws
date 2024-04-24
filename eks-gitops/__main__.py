@@ -1,4 +1,4 @@
-"""An AWS Python Pulumi program"""
+"""AWS/EKS cluster provision using ArgoCD"""
 
 from pulumi import export
 from resources import vpc, eks, iam, helm

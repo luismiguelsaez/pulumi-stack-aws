@@ -6,3 +6,29 @@ config:
   vpc:azs: 3
   vpc:subnet_mask: 24
   vpc:ngw_multi_az: False
+
+  # Helm charts enabled
+  charts:metrics_server_enabled: False
+  charts:cluster_autoscaler_enabled: False
+  charts:karpenter_enabled: False
+  charts:aws_load_balancer_controller_enabled: False
+  charts:external_dns_enabled: False
+  charts:ebs_csi_driver_enabled: False
+  charts:ingress_nginx_external_enabled: False
+  charts:ingress_nginx_internal_enabled: False
+  charts:opensearch_enabled: False
+  charts:argocd_enabled: True
+  charts:argocd_apps_enabled: True
+
+  ingress:external_ssl_enabled: True
+  ingress:external_ssl_cert_arns: "arn:aws:acm:eu-central-1:484308071187:certificate/aca221b6-0f15-4d58-b1f3-fd27fc14c67a"
+  ingress:external_domain: ".dev.lokalise.cloud"
+  ingress:internal_domain: ".dev.lokalise.cloud"
+
+  argocd:ingress_hostname: "argocd.dev.lokalise.cloud"
+  argocd:ingress_protocol: "https"
+  argocd:ingress_class_name: "nginx-external"
+  argocd:redis_ha_enabled: False
+  argocd:redis_ha_storage_size: "10Gi"
+
+  monitoring:pixie_deploy_key: "px-dep-f866efaa-d64f-425e-8bb0-13b87b213cd1"

@@ -2,6 +2,8 @@ from pulumi_aws.iam import Role, RolePolicyAttachment, InstanceProfile
 import json
 from common import stack_config, common_tags
 
+### EKS ###
+
 eks_cluster_role = Role(
     f"eks-{stack_config.require('name')}-cluster",
     assume_role_policy=json.dumps(

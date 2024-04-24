@@ -1,7 +1,7 @@
 """An AWS Python Pulumi program"""
 
 from pulumi import export
-from resources import vpc, eks, iam
+from resources import vpc, eks, iam, helm
 from common import aws_config, env
 from tools.kubeconfig import create_kubeconfig
 

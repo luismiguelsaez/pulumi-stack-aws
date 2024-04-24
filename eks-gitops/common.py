@@ -33,3 +33,9 @@ cluster_tags = {
 discovery_tags = {
     "karpenter.sh/discovery": stack_config.require('name'),
 }
+
+# HELM
+charts_config = Config("charts")
+argocd_config = Config("argocd")
+ingress_config = Config("ingress")
+monitoring_config = Config("monitoring")

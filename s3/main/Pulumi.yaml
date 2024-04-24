@@ -1,6 +1,0 @@
-name: s3-main
-runtime:
-  name: python
-  options:
-    virtualenv: venv
-description: S3 storage layer

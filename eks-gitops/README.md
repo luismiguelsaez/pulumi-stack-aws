@@ -18,6 +18,6 @@ pulumi up
 ## Get Kubeconfig
 
 ```bash
-pulumi stack output eks_kubeconfig  > kubeconfig.yaml
+pulumi stack output eks_kubeconfig > kubeconfig.yaml
 export KUBECONFIG=$(pwd)/kubeconfig.yaml
 ```

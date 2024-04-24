@@ -8,11 +8,13 @@ from tools.kubeconfig import create_kubeconfig
 
 aws_region = aws_config.require("region")
 
+# VPC
 export("vpc_id", vpc.vpc.id)
 export("subnets_public", [ subnet.id for subnet in vpc.subnets_public ])
 export("subnets_private", [ subnet.id for subnet in vpc.subnets_private ])
 export("availability_zones", vpc.azs.names)
 
+# EKS
 export("eks_cluster_name", eks.eks_cluster.name)
 export("eks_cluster_arn", eks.eks_cluster.arn)
 export("eks_cluster_endpoint", eks.eks_cluster.endpoint)

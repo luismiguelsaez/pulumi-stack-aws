@@ -15,7 +15,6 @@ common_tags = {
 }
 
 # VPC
-
 discovery_tags_public = {
     "kubernetes.io/role/elb": "1",
 }
@@ -26,7 +25,6 @@ discovery_tags_private = {
 }
 
 # EKS
-
 cluster_tags = {
     #f"kubernetes.io/cluster/{stack_config.require('name')}": "owned",
     "aws:eks:cluster-name": f"{stack_config.require('name')}",

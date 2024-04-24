@@ -1,0 +1,18 @@
+name: eks-gitops
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: AWS/EKS cluster provision using ArgoCD
+
+config:
+  org: luismiguelsaez
+
+  aws:region: eu-central-1
+
+  stack:name: main
+
+  vpc:cidr: "10.0.0.0/16"
+  vpc:azs: 3
+  vpc:subnet_mask: 24
+  vpc:ngw_multi_az: False

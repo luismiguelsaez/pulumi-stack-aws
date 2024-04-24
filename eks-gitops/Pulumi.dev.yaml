@@ -7,16 +7,12 @@ config:
   vpc:subnet_mask: 24
   vpc:ngw_multi_az: False
 
-  # Helm charts enabled
-  charts:metrics_server_enabled: False
-  charts:cluster_autoscaler_enabled: False
-  charts:karpenter_enabled: False
-  charts:aws_load_balancer_controller_enabled: False
-  charts:external_dns_enabled: False
-  charts:ebs_csi_driver_enabled: False
-  charts:ingress_nginx_external_enabled: False
-  charts:ingress_nginx_internal_enabled: False
-  charts:opensearch_enabled: False
+  eks:version: "1.28"
+  eks:name_prefix: test
+  eks:node_group_size_max: 5
+  eks:node_group_size_desired: 2
+  eks:node_group_size_min: 2
+
   charts:argocd_enabled: True
   charts:argocd_apps_enabled: True
 

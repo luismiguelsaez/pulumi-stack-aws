@@ -2,7 +2,7 @@ config:
   aws:region: eu-central-1
   aws:profile: dev
 
-  vpc:cidr: "10.0.0.0/16"
+  vpc:cidr: "172.16.0.0/16"
   vpc:azs: 3
   vpc:subnet_mask: 24
   vpc:ngw_multi_az: False

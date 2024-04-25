@@ -2,6 +2,7 @@ from pulumi_aws.secretsmanager import Secret, SecretVersion, get_secret
 import pulumi
 from resources import iam_helm as iam
 from . import eks
+from resources import s3
 from common import aws_config, ingress_config, monitoring_config
 from requests import get
 from pulumi_aws.eks import get_cluster
@@ -33,6 +34,7 @@ secrets_data = {
             'ebs_csi_driver': iam.ebs_csi_driver_role.arn,
             'external_dns': iam.external_dns_role.arn,
             'argocd': iam.argocd_role.arn,
+            'loki': iam.loki_role.arn,
         },
     },
     'info': {
@@ -53,6 +55,12 @@ secrets_data = {
             'external_ssl_cert_arns': ingress_config.require("external_ssl_cert_arns"),
             'internal_domain': ingress_config.require("internal_domain"),
             'internal_ssl_cert_arns': ingress_config.require("internal_ssl_cert_arns"),
+        },
+    },
+    'storage': {
+        'path': pulumi.Output.concat(secrets_root_path, "/storage"),
+        'values': {
+            's3_bucket_loki': s3.s3_bucket_loki.id,
         },
     },
     'monitoring': {

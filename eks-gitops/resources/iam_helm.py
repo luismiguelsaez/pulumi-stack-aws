@@ -260,6 +260,29 @@ external_dns_role = create_role_with_attached_policy(
     } | common_tags
 )
 
+loki_role = Role(
+    f"helm-{stack_config.require('name')}-loki",
+    name=f"helm-{stack_config.require('name')}-loki",
+    assume_role_policy=Output.json_dumps(
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "",
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Federated": eks.oidc_provider.arn
+                    },
+                    "Action": "sts:AssumeRoleWithWebIdentity"
+                }
+            ]
+        }
+    ),
+    tags={
+        "Name": f"helm-{stack_config.require('name')}-loki",
+    } | common_tags
+)
+
 #argocd_role = create_role_with_attached_policy(
 #    f"helm-{stack_config.require('name')}-argocd",
 #    path.join(path.dirname(__file__), "policies/argocd.json"),

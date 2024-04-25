@@ -1,12 +1,21 @@
 from pulumi import Output, ResourceOptions
 from pulumi_kubernetes.core.v1 import ConfigMap, ConfigMapPatch
 from pulumi_kubernetes.meta.v1 import ObjectMetaPatchArgs
-from common import k8s_provider, charts_config
-from resources import iam
-from requests import get
+from pulumi_kubernetes import Provider
+from common import env, aws_config
+from resources import iam_helm as iam
+from tools.kubeconfig import create_kubeconfig
 from . import eks
-
 import yaml
+
+
+aws_region = aws_config.require("region")
+
+k8s_provider = Provider(
+    resource_name="k8s",
+    kubeconfig=create_kubeconfig(eks_cluster=eks.eks_cluster, region=aws_region, aws_profile=env),
+)
+
 
 """
 Setup aws-auth ConfigMap for Karpenter

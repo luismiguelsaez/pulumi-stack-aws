@@ -1,18 +1,11 @@
 from pulumi import ResourceOptions, Output
 from pulumi_kubernetes.helm.v3 import Release, RepositoryOptsArgs
-from pulumi_kubernetes import Provider
 from resources import secrets
 from . import eks
 from . import iam_helm as iam
-from tools.kubeconfig import create_kubeconfig
-from common import aws_config, env, charts_config, argocd_config
+from resources.k8s import k8s_provider
+from common import env, charts_config, argocd_config
 
-aws_region = aws_config.require("region")
-
-k8s_provider = Provider(
-    resource_name="k8s",
-    kubeconfig=create_kubeconfig(eks_cluster=eks.eks_cluster, region=aws_region, aws_profile=env),
-)
 
 if charts_config.require_bool("argocd_enabled"):
     # Minimal ArgoCD Helm chart for cluster bootstrapping

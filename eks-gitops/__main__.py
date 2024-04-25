@@ -1,7 +1,7 @@
 """AWS/EKS cluster provision using ArgoCD"""
 
 from pulumi import export
-from resources import vpc, eks, iam, helm
+from resources import vpc, eks, iam, helm, k8s
 from common import aws_config, env
 from tools.kubeconfig import create_kubeconfig
 

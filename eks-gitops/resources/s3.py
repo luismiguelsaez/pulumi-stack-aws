@@ -11,6 +11,8 @@ Create S3 bucket for Loki storage
 s3_random_suffix = random.RandomString(
     f"s3-{stack_config.require('name')}-loki-random",
     length=10,
+    lower=True,
+    upper=False,
     special=False
 )
 

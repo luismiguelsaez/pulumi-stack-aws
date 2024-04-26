@@ -2,24 +2,45 @@
 
 This Stack depends on the [GitOps repository](https://github.com/luismiguelsaez/gitops-argocd-self-managed)
 
+## Authentication
+
+Authentication to AWS is done through SSO, so you need to have the AWS CLI configured with the SSO profile.
+
+```ini
+[sso-session default]
+sso_start_url = https://<ID>.awsapps.com/start
+sso_region = eu-central-1
+sso_registration_scopes = sso:account:access
+
+[profile dev]
+sso_session = default
+sso_account_id = <AWS_account_id>
+sso_role_name = <SSO_role_name>
+region = <AWS_region>
+```
+
+*The `profile` name must match the `config:aws:profile` setting in `Pulumi.<stack_name>.yaml`*
+
 ## Stack setup
 
-Modifi settings in `Pulumi.<stack-name>.yaml` file
+- Modify settings in `Pulumi.<stack_name>.yaml` file
 
-```bash
-pulumi stack ls
-pulumi stack select <stack-name>
-```
+- Select stack
 
-## Create infra
+    ```bash
+    pulumi stack ls
+    pulumi stack select <stack_name>
+    ```
 
-```bash
-pulumi up
-```
+- Create infra
 
-## Get Kubeconfig
+    ```bash
+    pulumi up
+    ```
 
-```bash
-pulumi stack output eks_kubeconfig > kubeconfig.yaml
-export KUBECONFIG=$(pwd)/kubeconfig.yaml
-```
+- Get Kubeconfig
+
+    ```bash
+    pulumi stack output eks_kubeconfig > kubeconfig.yaml
+    export KUBECONFIG=$(pwd)/kubeconfig.yaml
+    ```

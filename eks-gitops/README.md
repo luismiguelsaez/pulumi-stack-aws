@@ -21,6 +21,12 @@ region = <AWS_region>
 
 *The `profile` name must match the `config:aws:profile` setting in `Pulumi.<stack_name>.yaml`*
 
+After the AWS CLI is configured, you can authenticate with the following command:
+
+```bash
+aws sso login --sso-session default
+```
+
 ## Stack setup
 
 - Modify settings in `Pulumi.<stack_name>.yaml` file

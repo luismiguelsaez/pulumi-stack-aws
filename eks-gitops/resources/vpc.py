@@ -1,4 +1,3 @@
-from pulumi import Config, get_project, get_stack
 from pulumi_aws import ec2, get_availability_zones
 import ipaddress
 from common import stack_config, vpc_config, common_tags, discovery_tags_public, discovery_tags_private

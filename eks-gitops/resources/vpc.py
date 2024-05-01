@@ -1,6 +1,8 @@
+from pulumi import ResourceOptions
 from pulumi_aws import ec2, get_availability_zones
+from pulumi_command import local
 import ipaddress
-from common import stack_config, vpc_config, common_tags, discovery_tags_public, discovery_tags_private
+from common import env, stack_config, vpc_config, common_tags, discovery_tags_public, discovery_tags_private
 
 """
 Create VPC
@@ -13,6 +15,13 @@ vpc = ec2.Vpc(
     tags={
         "Name": f"{stack_config.require('name')}",
     } | common_tags,
+)
+
+remove_karpenter_nodes = local.Command(
+    resource_name=f"{stack_config.require('name')}-cmd-delete-nodes",
+    delete=f"aws --profile {env} ec2 describe-instances --filter 'Name=tag:karpenter.sh/managed-by,Values={stack_config.require('name')}' --query 'Reservations[].Instances[].[InstanceId]' --output text | tr '\\n' ' ' | while read I; do aws --profile {env} ec2 terminate-instances --instance-ids $I; done",
+    environment={"AWS_PAGER": ""},
+    opts=ResourceOptions(depends_on=[vpc]),
 )
 
 """

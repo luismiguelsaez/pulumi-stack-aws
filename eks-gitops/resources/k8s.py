@@ -25,7 +25,7 @@ aws_auth_cm = ConfigMap.get(
     id="kube-system/aws-auth",
     opts=ResourceOptions(
         provider=k8s_provider,
-        depends_on=[eks.eks_cluster, eks.eks_node_group_system]
+        depends_on=[eks.eks_cluster, eks.eks_nodegroup_system]
     )
 )
 

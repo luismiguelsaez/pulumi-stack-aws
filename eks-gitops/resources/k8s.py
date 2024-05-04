@@ -23,7 +23,10 @@ Setup aws-auth ConfigMap for Karpenter ( TODO: check cluster availability first 
 aws_auth_cm = ConfigMap.get(
     "aws-auth",
     id="kube-system/aws-auth",
-    opts=ResourceOptions(provider=k8s_provider)
+    opts=ResourceOptions(
+        provider=k8s_provider,
+        depends_on=[eks.eks_cluster, eks.eks_node_group_system]
+    )
 )
 
 roles_obj = aws_auth_cm.data['mapRoles'].apply(lambda roles: yaml.load(roles, Loader=yaml.Loader))

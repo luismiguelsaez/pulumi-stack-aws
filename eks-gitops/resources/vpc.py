@@ -17,12 +17,12 @@ vpc = ec2.Vpc(
     } | common_tags,
 )
 
-remove_karpenter_nodes = local.Command(
-    resource_name=f"{stack_config.require('name')}-cmd-delete-nodes",
-    delete=f"aws --profile {env} ec2 describe-instances --filter 'Name=tag:karpenter.sh/managed-by,Values={stack_config.require('name')}' --query 'Reservations[].Instances[].[InstanceId]' --output text | tr '\\n' ' ' | while read I; do aws --profile {env} ec2 terminate-instances --instance-ids $I; done",
-    environment={"AWS_PAGER": ""},
-    opts=ResourceOptions(depends_on=[vpc]),
-)
+#remove_karpenter_nodes = local.Command(
+#    resource_name=f"{stack_config.require('name')}-cmd-delete-nodes",
+#    delete=f"aws --profile {env} ec2 describe-instances --filter 'Name=tag:karpenter.sh/managed-by,Values={stack_config.require('name')}' --query 'Reservations[].Instances[].[InstanceId]' --output text | tr '\\n' ' ' | while read I; do aws --profile {env} ec2 terminate-instances --instance-ids $I; done",
+#    environment={"AWS_PAGER": ""},
+#    opts=ResourceOptions(depends_on=[vpc]),
+#)
 
 """
 Get availability zones

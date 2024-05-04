@@ -18,7 +18,7 @@ k8s_provider = Provider(
 
 
 """
-Setup aws-auth ConfigMap for Karpenter ( check cluster availability first )
+Setup aws-auth ConfigMap for Karpenter ( TODO: check cluster availability first )
 """
 aws_auth_cm = ConfigMap.get(
     "aws-auth",
